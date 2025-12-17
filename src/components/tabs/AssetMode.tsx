@@ -226,28 +226,38 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>감정 표현 (Emotion)</label>
-                                <select value={thumbEmotion} onChange={(e) => setThumbEmotion(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
-                                    <option value="shocked">Shocked (경악/입틀막)</option>
-                                    <option value="angry">Angry (분노)</option>
-                                    <option value="crying">Crying (슬픔)</option>
-                                    <option value="happy">Happy (환호)</option>
-                                    <option value="secretive">Secretive (비밀스러움)</option>
-                                    <option value="confused">Confused (혼란/물음표)</option>
-                                </select>
+                        {/* v12.0 Hide manual options if Gemini Image Ref is active */}
+                        {!(thumbEngine === 'gemini' && thumbImagePreview) && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>감정 표현 (Emotion)</label>
+                                    <select value={thumbEmotion} onChange={(e) => setThumbEmotion(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
+                                        <option value="shocked">Shocked (경악/입틀막)</option>
+                                        <option value="angry">Angry (분노)</option>
+                                        <option value="crying">Crying (슬픔)</option>
+                                        <option value="happy">Happy (환호)</option>
+                                        <option value="secretive">Secretive (비밀스러움)</option>
+                                        <option value="confused">Confused (혼란/물음표)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>화면 구도 (Composition)</label>
+                                    <select value={thumbComposition} onChange={(e) => setThumbComposition(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
+                                        <option value="split_screen">Split Screen (VS 대결)</option>
+                                        <option value="close_up">Extreme Close-up (얼굴 확대)</option>
+                                        <option value="object_focus">Object Focus (물건 강조)</option>
+                                        <option value="arrow_overlay">With Red Arrow (화살표 유도)</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>화면 구도 (Composition)</label>
-                                <select value={thumbComposition} onChange={(e) => setThumbComposition(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
-                                    <option value="split_screen">Split Screen (VS 대결)</option>
-                                    <option value="close_up">Extreme Close-up (얼굴 확대)</option>
-                                    <option value="object_focus">Object Focus (물건 강조)</option>
-                                    <option value="arrow_overlay">With Red Arrow (화살표 유도)</option>
-                                </select>
+                        )}
+
+                        {thumbEngine === 'gemini' && thumbImagePreview && (
+                            <div style={{ padding: '1rem', background: 'rgba(77, 171, 247, 0.1)', borderRadius: '8px', border: '1px solid #4dabf7', marginBottom: '1.5rem', textAlign: 'center', color: '#99e9f2' }}>
+                                ✨ <strong>이미지 복제 모드 활성화</strong><br />
+                                <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>감정, 구도 등 상세 설정은 무시되고, 업로드한 이미지 스타일을 전적으로 따릅니다.</span>
                             </div>
-                        </div>
+                        )}
 
                         <div style={{ marginTop: '1.5rem' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#ddd' }}>
