@@ -4,14 +4,16 @@ import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, I
 
 interface AssetModeProps {
     platform: 'midjourney' | 'veo3';
+    fixedAssetType?: 'default' | 'thumbnail'; // v13.0
 }
 
-export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
-    // Core
+export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }) => {
+    // v13.0: If fixedAssetType is provided, force that mode. Else default.
+    const [assetType, setAssetType] = useState<'default' | 'thumbnail'>(fixedAssetType || 'default');
     const [description, setDescription] = useState('');
 
     // Thumbnail Mode State (v6.0)
-    const [assetType, setAssetType] = useState<'default' | 'thumbnail'>('default');
+
     const [thumbEmotion, setThumbEmotion] = useState('surprised');
     const [thumbComposition, setThumbComposition] = useState('split_screen');
     const [thumbTextSpace, setThumbTextSpace] = useState(true);
@@ -124,11 +126,11 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
     return (
         <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem' }}>
             <h3 className="text-gradient" style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>
-                {platform === 'midjourney' ? 'Midjourney 이미지 에셋' : 'Veo3 숏폼 비디오'} 제작
+                {fixedAssetType === 'thumbnail' ? 'Viral Thumbnail Studio' : (platform === 'midjourney' ? 'Midjourney Art Studio' : 'Veo3 Video Studio')}
             </h3>
 
-            {/* v6.0 Thumbnail Studio Mode Toggle */}
-            {platform === 'midjourney' && (
+            {/* v6.0 Thumbnail Studio Mode Toggle - HIDDEN if fixedAssetType is present (v13.0) */}
+            {platform === 'midjourney' && !fixedAssetType && (
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: '#222', padding: '0.5rem', borderRadius: '8px' }}>
                     <button
                         onClick={() => setAssetType('default')}

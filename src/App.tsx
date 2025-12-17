@@ -3,11 +3,11 @@ import { Header } from './components/Header';
 import { StoryboardMode } from './components/tabs/StoryboardMode';
 import { AssetMode } from './components/tabs/AssetMode';
 import { BatchMode } from './components/tabs/BatchMode';
-import { Terminal, Video, Image as ImageIcon, Sparkles, Layers } from 'lucide-react';
+import { Terminal, Video, Image as ImageIcon, Sparkles, Layers, LayoutTemplate } from 'lucide-react';
 import clsx from 'clsx';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'chatgpt' | 'gemini' | 'midjourney' | 'veo3' | 'batch'>('chatgpt');
+  const [activeTab, setActiveTab] = useState<'chatgpt' | 'gemini' | 'midjourney' | 'thumbnail' | 'veo3' | 'batch'>('chatgpt');
 
   return (
     <div className="container" style={{ paddingBottom: '4rem' }}>
@@ -19,7 +19,8 @@ function App() {
           {[
             { id: 'chatgpt', label: 'ChatGPT (콘티)', icon: <Terminal size={18} /> },
             { id: 'gemini', label: 'Gemini (콘티)', icon: <Sparkles size={18} /> },
-            { id: 'midjourney', label: 'Midjourney (이미지)', icon: <ImageIcon size={18} /> },
+            { id: 'thumbnail', label: 'Thumbnail (썸네일)', icon: <LayoutTemplate size={18} /> }, // v13.0 New Tab
+            { id: 'midjourney', label: 'Midjourney (Art)', icon: <ImageIcon size={18} /> },
             { id: 'veo3', label: 'Veo3 (영상)', icon: <Video size={18} /> },
             { id: 'batch', label: 'Weekly Batch (기획)', icon: <Layers size={18} /> },
           ].map(tab => (
@@ -35,7 +36,7 @@ function App() {
                 padding: '1rem',
                 borderRadius: '12px',
                 border: activeTab === tab.id
-                  ? (tab.id === 'midjourney' ? '1px solid var(--color-primary)' : tab.id === 'veo3' ? '1px solid var(--color-secondary)' : tab.id === 'batch' ? '1px solid var(--color-accent)' : '1px solid #fff')
+                  ? (tab.id === 'thumbnail' ? '1px solid var(--color-accent)' : tab.id === 'midjourney' ? '1px solid var(--color-primary)' : tab.id === 'veo3' ? '1px solid var(--color-secondary)' : '1px solid #fff')
                   : '1px solid rgba(255,255,255,0.05)',
                 backgroundColor: activeTab === tab.id
                   ? 'rgba(255,255,255,0.08)'
@@ -60,7 +61,8 @@ function App() {
         <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
           {activeTab === 'chatgpt' && <StoryboardMode platform="chatgpt" />}
           {activeTab === 'gemini' && <StoryboardMode platform="gemini" />}
-          {activeTab === 'midjourney' && <AssetMode platform="midjourney" />}
+          {activeTab === 'thumbnail' && <AssetMode platform="midjourney" fixedAssetType="thumbnail" />} {/* v13.0 Dedicated Thumbnail Tab */}
+          {activeTab === 'midjourney' && <AssetMode platform="midjourney" fixedAssetType="default" />} {/* v13.0 Art Only */}
           {activeTab === 'veo3' && <AssetMode platform="veo3" />}
           {activeTab === 'batch' && <BatchMode />}
         </div>
