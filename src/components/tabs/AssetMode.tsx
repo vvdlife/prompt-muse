@@ -17,6 +17,8 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
     const [thumbTextSpace, setThumbTextSpace] = useState(true);
     const [thumbSref, setThumbSref] = useState('');
     const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('midjourney');
+    const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
+    const [thumbImagePreview, setThumbImagePreview] = useState<string | null>(null);
 
     // Midjourney States
     const [ar, setAr] = useState('16:9');
@@ -83,13 +85,24 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
         }
     };
 
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setThumbImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setThumbImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleGenerate = () => {
         let prompt = '';
         if (platform === 'midjourney') {
             if (assetType === 'thumbnail') {
                 if (thumbEngine === 'gemini') {
-                    prompt = generateGeminiThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace);
+                    prompt = generateGeminiThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace, !!thumbImageFile);
                 } else {
                     prompt = generateThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace, thumbSref);
                 }
@@ -256,6 +269,65 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                                     placeholder="예: https://cdn.discordapp.com/attachments/... (이미지 주소)"
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
                                 />
+                            </div>
+                        )}
+
+
+                        {thumbEngine === 'gemini' && (
+                            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #444' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>
+                                    스타일 참조 이미지 (Upload Reference)
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--color-accent)', marginLeft: '0.5rem' }}>* 제미나이가 이 스타일을 분석합니다.</span>
+                                </label>
+
+                                <div style={{
+                                    border: '2px dashed #444',
+                                    borderRadius: '8px',
+                                    padding: '1.5rem',
+                                    textAlign: 'center',
+                                    background: thumbImagePreview ? `url(${thumbImagePreview}) center/cover` : 'rgba(0,0,0,0.2)',
+                                    height: '150px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    {!thumbImagePreview && (
+                                        <>
+                                            <ImageIcon size={32} style={{ color: '#666', marginBottom: '0.5rem' }} />
+                                            <span style={{ fontSize: '0.9rem', color: '#888' }}>Click to upload JPG/PNG</span>
+                                        </>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileUpload}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            opacity: 0,
+                                            cursor: 'pointer'
+                                        }}
+                                    />
+                                    {thumbImagePreview && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: 0,
+                                            right: 0,
+                                            background: 'rgba(0,0,0,0.7)',
+                                            padding: '0.5rem',
+                                            fontSize: '0.8rem'
+                                        }}>
+                                            이미지 선택됨 (Gemini에 함께 붙여넣으세요)
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -506,6 +578,6 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
       `}</style>
-        </div>
+        </div >
     );
 };

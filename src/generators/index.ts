@@ -152,12 +152,20 @@ export const generateGeminiThumbnailPrompt = (
     topic: string,
     emotion: string,
     composition: string,
-    textSpace: boolean
+    textSpace: boolean,
+    hasRefImage: boolean = false
 ): string => {
     // Gemini (Imagen 3) Optimized Prompt
     // Focus on natural language description and explicit constraints.
 
     let prompt = `Create a high-quality YouTube thumbnail image for a video about "${topic}".\n\n`;
+
+    // v11.0 Image Reference Instruction
+    if (hasRefImage) {
+        prompt += `[Style Reference]\n`;
+        prompt += `- I have attached a reference image. Analyze its art style, color palette, lighting, and texture.\n`;
+        prompt += `- Generate the new thumbnail by MIMICKING the style of the attached image exactly, but with the new topic "${topic}".\n\n`;
+    }
 
     prompt += `[Visual Details]\n`;
     if (emotion) prompt += `- The main subject should express a "${emotion}" emotion.\n`;
