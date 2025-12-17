@@ -115,7 +115,7 @@ export const generateMidjourneyExpertPrompt = (
         details += `in the style of ${refData.title} (${refData.keywords}), `;
     }
 
-    const params = `--ar ${ar} --stylize ${stylize} --weird ${weird} --q 2 --v 6.0`;
+    const params = `--ar ${ar} --stylize ${stylize} --weird ${weird} --q 2 --v 6.0 --no text, watermark, signature, letters, typography, logo`;
     const defaultQuality = "8k resolution, highly detailed, unreal engine 5 render";
 
     return `/imagine prompt: ${core}, ${details}${defaultQuality} ${params}`;
@@ -132,9 +132,9 @@ export const generateThumbnailPrompt = (
 
     if (emotion) prompt += `featuring ${emotion} expression, `;
     if (composition) prompt += `${composition} composition, `;
-    if (textSpace) prompt += `with high contrast negative space for text overlay, `;
+    if (textSpace) prompt += `composition with empty negative space on the side for text placement, `;
 
-    prompt += `eye-catching, viral style, 4k resolution, highly detailed, vivid colors --ar 16:9 --v 6.0`;
+    prompt += `eye-catching, viral style, 4k resolution, highly detailed, vivid colors --ar 16:9 --v 6.0 --no text, font, typography, watermark, letters, signature`;
 
     return prompt;
 };
@@ -163,7 +163,8 @@ export const generateVeoExpertPrompt = (
 Concept: ${core}
 Style/Details: ${details}
 Camera Movement: ${cameraMove}
-Quality: ${resolution}, fluid motion, high temporal coherence, professional color grading.`;
+Quality: ${resolution}, fluid motion, high temporal coherence, professional color grading.
+Constraint: Do NOT display any text, subtitles, captions, or typography. Keep the visual feed clean.`;
 
     if (useAudio) {
         prompt += `\n\n[Audio Prompt]
