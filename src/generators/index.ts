@@ -123,6 +123,24 @@ export const generateMidjourneyExpertPrompt = (
     return `/imagine prompt: ${core}, ${details}${defaultQuality} ${params}`;
 };
 
+export const generateThumbnailPrompt = (
+    topic: string,
+    emotion: string,
+    composition: string,
+    textSpace: boolean
+): string => {
+    // Thumbnail Specific Logic
+    let prompt = `/imagine prompt: YouTube Thumbnail for "${topic}", `;
+
+    if (emotion) prompt += `featuring ${emotion} expression, `;
+    if (composition) prompt += `${composition} composition, `;
+    if (textSpace) prompt += `with high contrast negative space for text overlay, `;
+
+    prompt += `eye-catching, viral style, 4k resolution, highly detailed, vivid colors --ar 16:9 --v 6.0`;
+
+    return prompt;
+};
+
 export const generateVeoExpertPrompt = (
     description: string,
     cameraMove: string,
