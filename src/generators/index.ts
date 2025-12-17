@@ -1,114 +1,117 @@
-export type Platform = 'chatgpt' | 'midjourney' | 'veo3';
+export type Platform = 'chatgpt' | 'gemini' | 'midjourney' | 'veo3';
 
 export interface PromptResult {
     platform: Platform;
     content: string;
-    metadata?: Record<string, string>;
 }
 
-// Helper to escape XML
-const escapeXml = (unsafe: string) => unsafe.replace(/[<>&'"]/g, c => {
-    switch (c) {
-        case '<': return '&lt;';
-        case '>': return '&gt;';
-        case '&': return '&amp;';
-        case '\'': return '&apos;';
-        case '"': return '&quot;';
-        default: return c;
-    }
-});
+// ------------------------------------------------------------------
+// 1. Storyboard Logic (ChatGPT / Gemini)
+// ------------------------------------------------------------------
 
-export const generateChatGPTPrompt = (concept: string, style: string): string => {
-    // Chain of Thought & XML Structure for "Expert" output
-    const tone = style === 'corporate' ? 'Professional, Concise' : 'Creative, Descriptive';
+export const generateStoryboardPrompt = (
+    platform: 'chatgpt' | 'gemini',
+    topic: string,
+    genre: string,
+    duration: string,
+    language: 'ko' | 'en' = 'ko'
+): string => {
+    const role = language === 'ko'
+        ? '당신은 전문 영화 감독이자 시나리오 작가입니다.'
+        : 'You are a professional film director and screenwriter.';
 
-    return `<prompt>
-  <role>Expert Content Creator & Prompt Engineer</role>
-  <context>
-    User wants to generate content based on the concept: "${escapeXml(concept)}".
-    The desired style is: ${style}.
-  </context>
-  <task>
-    1. Analyze the concept deeply.
-    2. Expand it into a full narrative or detailed description.
-    3. Maintain a ${tone} tone throughout.
-  </task>
-  <constraints>
-    <item>Use Markdown formatting for readability.</item>
-    <item>Avoid generic clichés.</item>
-    <item>Provide 3 distinct variations.</item>
-  </constraints>
-  <output_format>Markdown</output_format>
-</prompt>`;
+    const task = language === 'ko'
+        ? `다음 주제를 바탕으로 촬영을 위한 완벽한 영상 콘티(Storyboard)를 작성해주세요.`
+        : `Create a perfect video storyboard for filming based on the following topic.`;
+
+    const context = `
+  - 주제(Topic): ${topic}
+  - 장르(Genre): ${genre}
+  - 예상 길이(Duration): ${duration}
+  `;
+
+    const constraints = language === 'ko'
+        ? `
+    1. 표(Table) 형식을 사용하여 출력하세요.
+    2. 컬럼 구성: [씬 번호] | [화면 묘사] | [오디오/대사] | [카메라 워킹] | [예상 시간]
+    3. '화면 묘사'는 시각적으로 매우 구체적이어야 합니다.
+    4. '카메라 워킹'은 전문 용어(Drone pan, Close-up, Dolly zoom 등)를 사용하세요.
+    5. 마지막에는 각 씬을 AI 이미지/비디오 생성기로 만들기 위한 '장면별 영문 키워드 요약'을 덧붙여주세요.
+    `
+        : `
+    1. Use a Table format.
+    2. Columns: [Scene #] | [Visual Description] | [Audio/Dialogue] | [Camera Movement] | [Duration]
+    3. Visual descriptions must be extremely specific.
+    4. Use professional camera terms (Drone pan, Close-up, Dolly zoom, etc.).
+    5. At the end, provide a 'English Keyword Summary per Scene' for AI generation.
+    `;
+
+    return `
+# ${platform === 'gemini' ? 'Gemini' : 'ChatGPT'} Expert Prompt
+${role}
+
+## Task
+${task}
+
+## Context
+${context}
+
+## Constraints
+${constraints}
+
+## Output Format
+Markdown Table
+`;
 };
 
-export const generateMidjourneyPrompt = (concept: string, style: string): string => {
-    let params = '--v 6.0 --q 2';
-    let keywords = '';
+// ------------------------------------------------------------------
+// 2. Asset Logic (Midjourney / Veo3)
+// ------------------------------------------------------------------
 
-    switch (style) {
-        case 'cinematic':
-            keywords = 'cinematic lighting, anamorphic lens, 85mm f/1.8, global illumination, unreal engine 5 render, hyper-detailed';
-            params += ' --ar 16:9 --stylize 250';
-            break;
-        case 'photorealistic':
-            keywords = '8k resolution, raw photo, fujifilm xt-4, sharp focus, ray tracing, octane render';
-            params += ' --ar 3:2 --stylize 100';
-            break;
-        case 'anime':
-            keywords = 'studio ghibli style, makoto shinkai style, vibrant colors, detailed background, 2d cel shading';
-            params += ' --niji 6 --ar 16:9';
-            break;
-        case 'dark-fantasy':
-            keywords = 'dark fantasy, elden ring style, volumetric fog, ominous atmosphere, detailed textures, baroque';
-            params += ' --ar 2:3 --chaos 20 --stylize 500';
-            break;
-        default:
-            keywords = 'high quality, detailed';
-            params += ' --ar 1:1';
-    }
-
-    return `/imagine prompt: ${concept}, ${keywords} ${params}`;
+// Simulated "Smart Translation" wrapper
+const wrapForAsset = (input: string, type: 'image' | 'video'): string => {
+    // In a real app, this would call a translation API.
+    // Here, we maintain the Korean input but wrap it strongly with English descriptors
+    // to ensure the AI "gets the vibe" even if it processes mixed language.
+    // OR we assume users might input mixed text.
+    // Ideally, users should write simple English, but if they write Korean,
+    // Veo/MJ might struggle slightly, but modern models are okay.
+    // We will simply pass it through but add STRONG English styling keywords.
+    return input;
 };
 
-export const generateVeoPrompt = (concept: string, style: string): string => {
-    // Veo 3 Specifics: Camera Control, Motion, Audio
-    let camera = '';
-    let audio = '';
+export const generateMidjourneyExpertPrompt = (
+    description: string,
+    ar: string, // e.g., '16:9'
+    stylize: number, // 0-1000
+    weird: number // 0-3000
+): string => {
+    const core = wrapForAsset(description, 'image');
+    const params = `--ar ${ar} --stylize ${stylize} --weird ${weird} --q 2 --v 6.0`;
 
-    switch (style) {
-        case 'cinematic':
-            camera = 'Cinematic drone shot, slow pan to right, rack focus on subject';
-            audio = 'Epic orchestral score, deep bass hits, ambient wind';
-            break;
-        case 'anime':
-            camera = 'Dynamic camera movement, fast zoom in, speed lines';
-            audio = 'Upbeat synthesizer music, sharp sound effects';
-            break;
-        case 'photorealistic':
-            camera = 'Steadycam shot, following subject, shallow depth of field';
-            audio = 'Realistic city ambience, footsteps on pavement, distant car horns';
-            break;
-        default:
-            camera = 'Static wide shot, high resolution';
-            audio = 'Subtle background music';
-    }
+    // Expert keywords injection
+    const qualityKeywords = "8k resolution, photorealistic, cinematic lighting, highly detailed, unreal engine 5 render, global illumination";
 
-    // Structured for Veo (simulated based on typical video gen prompt structure)
-    return `[Video Prompt]
-Concept: ${concept}
-Style: ${style}
+    return `/imagine prompt: ${core}, ${qualityKeywords} ${params}`;
+};
+
+export const generateVeoExpertPrompt = (
+    description: string,
+    camera: string,
+    resolution: '1080p' | '4k',
+    useAudio: boolean
+): string => {
+    const core = wrapForAsset(description, 'video');
+
+    let prompt = `[Video Prompt]
+Concept: ${core}
 Camera Movement: ${camera}
-Refinements: 4k resolution, fluid motion, high temporal coherence, consistent lighting.
+Quality: ${resolution}, fluid motion, high temporal coherence, consistent texture, professional color grading.`;
 
-[Audio Prompt]
-Soundscape: ${audio}`;
-};
+    if (useAudio) {
+        prompt += `\n\n[Audio Prompt]
+Soundscape: High fidelity ambient sound, matching the visual mood, clear and distinct SFX.`;
+    }
 
-export const generateAllPrompts = (concept: string, style: string): PromptResult[] => {
-    return [
-        { platform: 'chatgpt', content: generateChatGPTPrompt(concept, style) },
-        { platform: 'midjourney', content: generateMidjourneyPrompt(concept, style) },
-        { platform: 'veo3', content: generateVeoPrompt(concept, style) },
-    ];
+    return prompt;
 };
