@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Header } from './components/Header';
 import { PromptInput } from './components/PromptInput';
 import { PromptOutput } from './components/PromptOutput';
-import { generateAllPrompts, PromptResult } from './generators';
+import { generateAllPrompts, type PromptResult } from './generators';
 
 function App() {
   const [isGenerating, setIsGenerating] = useState(false);

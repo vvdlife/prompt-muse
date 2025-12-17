@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Copy, Check, Terminal, Image as ImageIcon, Video } from 'lucide-react';
-import { PromptResult } from '../generators';
+import type { PromptResult } from '../generators';
 
 interface PromptOutputProps {
     results: PromptResult[];
