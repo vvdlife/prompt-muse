@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { generateMidjourneyExpertPrompt, generateVeoExpertPrompt } from '../../generators';
-import { Copy, Check, Info } from 'lucide-react';
+import { Copy, Check, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface AssetModeProps {
     platform: 'midjourney' | 'veo3';
 }
 
 export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
+    // Core
     const [description, setDescription] = useState('');
-    const [result, setResult] = useState('');
-    const [copied, setCopied] = useState(false);
 
     // Midjourney States
     const [ar, setAr] = useState('16:9');
@@ -21,12 +20,22 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
     const [resolution, setResolution] = useState<'1080p' | '4k'>('4k');
     const [useAudio, setUseAudio] = useState(true);
 
+    // Advanced (v3.0)
+    const [lighting, setLighting] = useState('');
+    const [lens, setLens] = useState('');
+    const [color, setColor] = useState('');
+    const [texture, setTexture] = useState('');
+    const [showAdvanced, setShowAdvanced] = useState(false);
+
+    const [result, setResult] = useState('');
+    const [copied, setCopied] = useState(false);
+
     const handleGenerate = () => {
         let prompt = '';
         if (platform === 'midjourney') {
-            prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird);
+            prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture);
         } else {
-            prompt = generateVeoExpertPrompt(description, camera, resolution, useAudio);
+            prompt = generateVeoExpertPrompt(description, camera, resolution, useAudio, lighting, lens); // Lens mapped to mood/atmosphere for video
         }
         setResult(prompt);
     };
@@ -57,17 +66,17 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                     />
                 </div>
 
-                {/* Platform Specific Controls */}
+                {/* Platform Specific Core Controls */}
                 <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
                     <h4 style={{ marginBottom: '1rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Info size={16} /> 전문가 설정 ({platform === 'midjourney' ? 'Parameter Tuning' : 'Camera & Audio'})
+                        <Info size={16} /> 필수 설정 ({platform === 'midjourney' ? 'Basic Params' : 'Cam & Res'})
                     </h4>
 
                     {platform === 'midjourney' ? (
                         <div style={{ display: 'grid', gap: '1rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>종횡비 (--ar)</label>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                     {['16:9', '9:16', '1:1', '4:3', '21:9'].map(r => (
                                         <button
                                             key={r}
@@ -89,20 +98,20 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                                 <div>
                                     <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                                        스타일 강도 (--stylize) <span>{stylize}</span>
+                                        스타일 강도 ({stylize})
                                     </label>
                                     <input type="range" min="0" max="1000" value={stylize} onChange={(e) => setStylize(Number(e.target.value))} style={{ width: '100%' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                                        기괴함 (--weird) <span>{weird}</span>
+                                        기괴함 ({weird})
                                     </label>
                                     <input type="range" min="0" max="3000" value={weird} onChange={(e) => setWeird(Number(e.target.value))} style={{ width: '100%' }} />
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        // Veo3 Controls
+                        // Veo3 Core Controls
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>카메라 무브먼트</label>
@@ -121,11 +130,11 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>설정</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>해상도 및 오디오</label>
                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                                         <input type="checkbox" checked={useAudio} onChange={(e) => setUseAudio(e.target.checked)} />
-                                        오디오 프롬프트 포함
+                                        오디오
                                     </label>
                                     <select value={resolution} onChange={(e) => setResolution(e.target.value as any)} style={{ padding: '0.5rem', borderRadius: '4px', background: '#222', color: 'white', border: '1px solid #444' }}>
                                         <option value="1080p">1080p</option>
@@ -133,6 +142,76 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                                     </select>
                                 </div>
                             </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* v3.0 Advanced Details Accordion */}
+                <div style={{ border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+                    <button
+                        onClick={() => setShowAdvanced(!showAdvanced)}
+                        style={{
+                            width: '100%',
+                            padding: '1rem',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            background: 'rgba(255,255,255,0.03)',
+                            color: 'var(--color-text-muted)',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <span style={{ fontWeight: 600 }}>🎨 디테일 룩/조명 설정 (Details)</span>
+                        {showAdvanced ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </button>
+
+                    {showAdvanced && (
+                        <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', background: 'rgba(0,0,0,0.2)' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>조명 (Lighting)</label>
+                                <select value={lighting} onChange={(e) => setLighting(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
+                                    <option value="">기본 (Default)</option>
+                                    <option value="Golden Hour">Golden Hour (황금 시간대)</option>
+                                    <option value="Cyberpunk Neon">Cyberpunk Neon (네온)</option>
+                                    <option value="Studio Softbox">Studio Softbox (스튜디오)</option>
+                                    <option value="Cinematic Volumetric">Volumetric Fog (빛내림/안개)</option>
+                                    <option value="Dark Noir">Dark Noir (누아르)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>렌즈/화각 (Lens)</label>
+                                <select value={lens} onChange={(e) => setLens(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
+                                    <option value="">기본 (Default)</option>
+                                    <option value="Wide Angle">Wide Angle (광각/웅장함)</option>
+                                    <option value="Telephoto">Telephoto (망원/인물집중)</option>
+                                    <option value="Macro Lens">Macro (초접사)</option>
+                                    <option value="Fisheye">Fisheye (어안 렌즈)</option>
+                                </select>
+                            </div>
+                            {platform === 'midjourney' && (
+                                <>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>색감 (Color Palette)</label>
+                                        <select value={color} onChange={(e) => setColor(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
+                                            <option value="">기본 (Default)</option>
+                                            <option value="Vibrant High Saturation">Vibrant (강렬함)</option>
+                                            <option value="Black and White">Black & White (흑백)</option>
+                                            <option value="Pastel Tones">Pastel (파스텔)</option>
+                                            <option value="Muted Earth Tones">Earth Tones (차분함)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>텍스처/스타일 (Texture)</label>
+                                        <select value={texture} onChange={(e) => setTexture(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
+                                            <option value="">기본 (Realism)</option>
+                                            <option value="Oil Painting">Oil Painting (유화)</option>
+                                            <option value="3D Render Pixar Style">3D Render (픽사풍)</option>
+                                            <option value="Pencil Sketch">Sketch (스케치)</option>
+                                            <option value="Glitch Art">Glitch Art (글리치)</option>
+                                        </select>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
@@ -149,7 +228,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                         boxShadow: 'var(--glow-secondary)'
                     }}
                 >
-                    {platform === 'midjourney' ? '이미지 생성 프롬프트 만들기' : '비디오 생성 프롬프트 만들기'}
+                    {platform === 'midjourney' ? '디테일 프롬프트 생성' : '비디오 프롬프트 생성'}
                 </button>
 
                 {result && (
