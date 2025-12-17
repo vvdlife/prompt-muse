@@ -72,7 +72,7 @@ Markdown Table
 // 2. Asset Logic (Midjourney / Veo3)
 // ------------------------------------------------------------------
 
-const wrapForAsset = (input: string, type: 'image' | 'video'): string => {
+const wrapForAsset = (input: string, _type: 'image' | 'video'): string => {
     return input;
 };
 

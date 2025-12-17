@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { generateStoryboardPrompt } from '../../generators';
 import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import clsx from 'clsx';
 
 interface StoryboardModeProps {
     platform: 'chatgpt' | 'gemini';
