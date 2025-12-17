@@ -25,47 +25,45 @@ export const generateStoryboardPrompt = (
     targetAudience: string = '',
     characters: string = '',
     refData: ReferenceData | null = null, // v4.0 New Param
-    language: 'ko' | 'en' = 'ko'
+    _language: 'ko' | 'en' = 'ko'
 ): string => {
-    const role = language === 'ko'
-        ? '당신은 전문 영화 감독이자 시나리오 작가입니다.'
-        : 'You are a professional film director and screenwriter.';
+    // User requested "Prompt in English, Output in Korean" logic.
+    // We use English for the System Instructions to get better logic from the LLM.
+
+    const role = 'You are a professional film director and screenwriter (Video Content Expert).';
 
     let context = `
-  - 주제(Topic): ${topic}
-  - 장르(Genre): ${genre}
-  - 예상 길이(Duration): ${duration}
+  - Core Topic: ${topic}
+  - Genre: ${genre}
+  - Duration: ${duration}
   `;
 
-    if (mood) context += `- 분위기(Mood): ${mood}\n  `;
-    if (targetAudience) context += `- 타겟 오디언스(Target Audience): ${targetAudience}\n  `;
-    if (characters) context += `- 주요 등장인물(Key Characters): ${characters}\n  `;
+    if (mood) context += `- Mood/Tone: ${mood}\n  `;
+    if (targetAudience) context += `- Target Audience: ${targetAudience}\n  `;
+    if (characters) context += `- Key Characters: ${characters}\n  `;
 
     // v4.0 URL Reference Injection
     if (refData && refData.url) {
         context += `
-  - 참고 자료(Reference Source):
+  - Reference Source (Style/Content Grounding):
     - URL: ${refData.url}
-    - 제목: ${refData.title}
-    - 핵심 요약: ${refData.description}
-    - 키워드: ${refData.keywords}
+    - Title: ${refData.title}
+    - Summary: ${refData.description}
+    - Keywords: ${refData.keywords}
     `;
     }
 
-    const task = language === 'ko'
-        ? `위 정보를 바탕으로 촬영을 위한 완벽한 영상 콘티(Storyboard)를 작성해주세요.`
-        : `Create a perfect video storyboard based on the info above.`;
+    const task = `Based on the context above, write a perfect video storyboard and script plan.`;
 
-    const constraints = language === 'ko'
-        ? `
-    1. 표(Table) 형식을 사용하여 출력하세요.
-    2. 컬럼 구성: [씬 번호] | [화면 묘사] | [오디오/대사] | [카메라 워킹] | [예상 시간]
-    3. '화면 묘사'는 시각적으로 매우 구체적이어야 하며, 설정된 분위기(${mood || '기본'})를 반영해야 합니다.
-    4. '카메라 워킹'은 전문 용어(Drone pan, Close-up, Dolly zoom 등)를 사용하세요.
-    ${refData ? `5. [중요] 참고 자료의 내용과 스타일을 적극적으로 시나리오에 반영하세요.` : ''}
-    6. 마지막에는 각 씬을 AI 이미지/비디오 생성기로 만들기 위한 '장면별 영문 키워드 요약'을 덧붙여주세요.
-    `
-        : `...`;
+    const constraints = `
+    1. **Language Requirement**: The final output MUST be written in **KOREAN (한국어)**. Do not output English unless it's a technical term or specified.
+    2. Format: Use a structured Markdown Table.
+    3. Columns: [Scene #] | [Visual Description (Korean)] | [Audio/Script (Korean)] | [Camera Moment] | [Est. Time]
+    4. "Visual Description" must be vivid and reflect the mood (${mood || 'Default'}).
+    5. "Camera Movement" should use professional terms (e.g., Dolly Zoom, Pan, Tilt) in English or Korean.
+    ${refData ? `6. **Reference Integration**: Actively incorporate the style and insights from the provided Reference Source.` : ''}
+    7. After the table, provide a set of "English Image Prompts" for each scene so I can generate them in Midjourney.
+    `;
 
     return `
 # ${platform === 'gemini' ? 'Gemini' : 'ChatGPT'} Expert Prompt
@@ -81,7 +79,7 @@ ${context}
 ${constraints}
 
 ## Output Format
-Markdown Table
+Markdown Table (in Korean)
 `;
 };
 

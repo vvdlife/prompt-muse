@@ -45,6 +45,7 @@ Create a detailed content plan and script outlines for the following 4 videos:
 
 ## Execution Instruction
 Provide the output in a structured format (Markdown) that I can immediately use to film.
+**CRITICAL: All Scripts, Outlines, and Explanations MUST be written in KOREAN (한국어). Do not use English for the final content.**
 `;
     };
 
