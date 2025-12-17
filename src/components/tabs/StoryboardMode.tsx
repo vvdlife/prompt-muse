@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { generateStoryboardPrompt, type ReferenceData } from '../../generators';
-import { Copy, Check, ChevronDown, ChevronUp, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Copy, Check, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Save, Trash2, FolderOpen } from 'lucide-react';
+import { usePresets } from '../../hooks/usePresets';
 
 interface StoryboardModeProps {
     platform: 'chatgpt' | 'gemini';
+}
+
+interface StoryboardState {
+    genre: string;
+    duration: string;
+    mood: string;
+    targetAudience: string;
 }
 
 export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
@@ -26,19 +34,35 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
     const [result, setResult] = useState('');
     const [copied, setCopied] = useState(false);
 
+    // Presets (v5.0)
+    const { presets, savePreset, deletePreset } = usePresets<StoryboardState>('storyboard-presets');
+    const [showPresets, setShowPresets] = useState(false);
+    const [newPresetName, setNewPresetName] = useState('');
+
+    const handleSavePreset = () => {
+        if (!newPresetName) return;
+        savePreset(newPresetName, { genre, duration, mood, targetAudience });
+        setNewPresetName('');
+        setShowPresets(false);
+    };
+
+    const handleLoadPreset = (data: StoryboardState) => {
+        setGenre(data.genre);
+        setDuration(data.duration);
+        setMood(data.mood);
+        setTargetAudience(data.targetAudience);
+        setShowPresets(false);
+    };
+
     // Analyze URL Function
     const handleAnalyzeUrl = async () => {
         if (!url) return;
         setIsAnalyzing(true);
 
         try {
-            // Check environment (Local Dev workaround vs Vercel Prod)
-            // In local dev without 'vercel dev', /api won't work. We mock it for demonstration.
             const isLocalhost = window.location.hostname === 'localhost';
-
             let data;
             if (isLocalhost && !import.meta.env.VITE_VERCEL_ENV) {
-                // Mock fetch for local dev review
                 await new Promise(r => setTimeout(r, 1500));
                 data = {
                     success: true,
@@ -79,7 +103,7 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
             mood,
             targetAudience,
             characters,
-            refData, // Pass refData
+            refData,
             'ko'
         );
         setResult(prompt);
@@ -92,10 +116,50 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
     };
 
     return (
-        <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem' }}>
-            <h3 className="text-gradient" style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>
-                {platform === 'gemini' ? 'Gemini' : 'ChatGPT'} 영상 콘티 작가 모드
-            </h3>
+        <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem', position: 'relative' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>
+                    {platform === 'gemini' ? 'Gemini' : 'ChatGPT'} 영상 콘티 작가 모드
+                </h3>
+
+                {/* Preset Toggle */}
+                <button
+                    onClick={() => setShowPresets(!showPresets)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '20px', background: '#333', border: '1px solid #555', color: 'white', cursor: 'pointer' }}
+                >
+                    <FolderOpen size={16} /> 프리셋 ({presets.length})
+                </button>
+            </div>
+
+            {/* Preset Modal/Dropdown */}
+            {showPresets && (
+                <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#222', borderRadius: '8px', border: '1px solid #444' }}>
+                    <h4 style={{ marginBottom: '1rem', color: '#ccc' }}>설정 불러오기 / 저장</h4>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                        {presets.length === 0 && <span style={{ color: '#666' }}>저장된 프리셋이 없습니다.</span>}
+                        {presets.map(p => (
+                            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#333', padding: '0.5rem 1rem', borderRadius: '4px' }}>
+                                <span onClick={() => handleLoadPreset(p.data)} style={{ cursor: 'pointer', fontWeight: 600 }}>{p.name}</span>
+                                <Trash2 size={14} style={{ cursor: 'pointer', color: '#ff6b6b' }} onClick={() => deletePreset(p.id)} />
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid #444', paddingTop: '1rem' }}>
+                        <input
+                            type="text"
+                            value={newPresetName}
+                            onChange={(e) => setNewPresetName(e.target.value)}
+                            placeholder="새 프리셋 이름 (예: 쇼츠 기본)"
+                            style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', background: '#111', color: 'white', border: '1px solid #555' }}
+                        />
+                        <button onClick={handleSavePreset} disabled={!newPresetName} style={{ padding: '0.5rem 1rem', background: 'var(--color-primary)', color: 'black', fontWeight: 600, borderRadius: '4px' }}>
+                            <Save size={16} /> 저장
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div style={{ display: 'grid', gap: '1.5rem' }}>
                 {/* Core Inputs */}

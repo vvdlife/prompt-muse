@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Header } from './components/Header';
 import { StoryboardMode } from './components/tabs/StoryboardMode';
 import { AssetMode } from './components/tabs/AssetMode';
-import { Terminal, Video, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { BatchMode } from './components/tabs/BatchMode';
+import { Terminal, Video, Image as ImageIcon, Sparkles, Layers } from 'lucide-react';
 import clsx from 'clsx';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'chatgpt' | 'gemini' | 'midjourney' | 'veo3'>('chatgpt');
+  const [activeTab, setActiveTab] = useState<'chatgpt' | 'gemini' | 'midjourney' | 'veo3' | 'batch'>('chatgpt');
 
   return (
     <div className="container" style={{ paddingBottom: '4rem' }}>
@@ -20,6 +21,7 @@ function App() {
             { id: 'gemini', label: 'Gemini (콘티)', icon: <Sparkles size={18} /> },
             { id: 'midjourney', label: 'Midjourney (이미지)', icon: <ImageIcon size={18} /> },
             { id: 'veo3', label: 'Veo3 (영상)', icon: <Video size={18} /> },
+            { id: 'batch', label: 'Weekly Batch (기획)', icon: <Layers size={18} /> },
           ].map(tab => (
             <button
               key={tab.id}
@@ -33,7 +35,7 @@ function App() {
                 padding: '1rem',
                 borderRadius: '12px',
                 border: activeTab === tab.id
-                  ? (tab.id === 'midjourney' ? '1px solid var(--color-primary)' : tab.id === 'veo3' ? '1px solid var(--color-secondary)' : '1px solid #fff')
+                  ? (tab.id === 'midjourney' ? '1px solid var(--color-primary)' : tab.id === 'veo3' ? '1px solid var(--color-secondary)' : tab.id === 'batch' ? '1px solid var(--color-accent)' : '1px solid #fff')
                   : '1px solid rgba(255,255,255,0.05)',
                 backgroundColor: activeTab === tab.id
                   ? 'rgba(255,255,255,0.08)'
@@ -60,6 +62,7 @@ function App() {
           {activeTab === 'gemini' && <StoryboardMode platform="gemini" />}
           {activeTab === 'midjourney' && <AssetMode platform="midjourney" />}
           {activeTab === 'veo3' && <AssetMode platform="veo3" />}
+          {activeTab === 'batch' && <BatchMode />}
         </div>
 
       </main>
