@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { generateMidjourneyExpertPrompt, generateVeoExpertPrompt } from '../../generators';
-import { Copy, Check, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { generateMidjourneyExpertPrompt, generateVeoExpertPrompt, type ReferenceData } from '../../generators';
+import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2 } from 'lucide-react';
 
 interface AssetModeProps {
     platform: 'midjourney' | 'veo3';
@@ -27,15 +27,61 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
     const [texture, setTexture] = useState('');
     const [showAdvanced, setShowAdvanced] = useState(false);
 
+    // URL Grounding (v4.0)
+    const [url, setUrl] = useState('');
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [refData, setRefData] = useState<ReferenceData | null>(null);
+
     const [result, setResult] = useState('');
     const [copied, setCopied] = useState(false);
+
+    // Analyze URL Function
+    const handleAnalyzeUrl = async () => {
+        if (!url) return;
+        setIsAnalyzing(true);
+
+        try {
+            const isLocalhost = window.location.hostname === 'localhost';
+            let data;
+            if (isLocalhost && !import.meta.env.VITE_VERCEL_ENV) {
+                await new Promise(r => setTimeout(r, 1500));
+                data = {
+                    success: true,
+                    data: {
+                        title: "Example ArtStation Portfolio",
+                        description: "Dark fantasy concept art style guide.",
+                        keywords: "dark fantasy, oil painting, heavy texture, gothic"
+                    }
+                };
+            } else {
+                const res = await fetch('/api/analyze-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                data = await res.json();
+            }
+
+            if (data.success) {
+                setRefData({ url, ...data.data });
+            } else {
+                alert('URL 분석 실패: ' + data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('분석 중 오류가 발생했습니다.');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
 
     const handleGenerate = () => {
         let prompt = '';
         if (platform === 'midjourney') {
-            prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture);
+            prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture, refData);
         } else {
-            prompt = generateVeoExpertPrompt(description, camera, resolution, useAudio, lighting, lens); // Lens mapped to mood/atmosphere for video
+            prompt = generateVeoExpertPrompt(description, camera, resolution, useAudio, lighting, lens, refData);
         }
         setResult(prompt);
     };
@@ -64,6 +110,47 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                         placeholder="예: 비 젖은 사이버펑크 도시의 네온 사인 아래 서 있는 로봇"
                         style={{ width: '100%', minHeight: '100px', padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--color-border)', resize: 'vertical' }}
                     />
+                </div>
+
+                {/* v4.0 URL Reference Input */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>레퍼런스 이미지/스타일 URL (Style Cloning)</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                            type="text"
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                            placeholder="예: https://artstation.com/artwork/... (스타일 참고용)"
+                            style={{ flex: 1, padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--color-border)' }}
+                        />
+                        <button
+                            onClick={handleAnalyzeUrl}
+                            disabled={isAnalyzing || !url}
+                            style={{
+                                padding: '0 1.5rem',
+                                borderRadius: '8px',
+                                background: 'var(--color-secondary)',
+                                color: 'black',
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                cursor: url ? 'pointer' : 'not-allowed',
+                                opacity: url ? 1 : 0.5
+                            }}
+                        >
+                            {isAnalyzing ? <Loader2 size={18} className="spin" /> : <LinkIcon size={18} />}
+                            {isAnalyzing ? '분석 중...' : 'URL 분석'}
+                        </button>
+                    </div>
+
+                    {/* Analyzed Data Preview */}
+                    {refData && (
+                        <div style={{ marginTop: '0.5rem', padding: '0.8rem', borderRadius: '6px', background: 'rgba(0,255,136,0.1)', border: '1px solid var(--color-primary)', fontSize: '0.9rem', color: '#ddd' }}>
+                            <div style={{ fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.2rem' }}>✅ 분석 완료: {refData.title}</div>
+                            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', opacity: 0.8 }}>{refData.description}</div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Platform Specific Core Controls */}
@@ -261,6 +348,10 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                     </div>
                 )}
             </div>
+            <style>{`
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+      `}</style>
         </div>
     );
 };

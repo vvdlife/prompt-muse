@@ -5,6 +5,13 @@ export interface PromptResult {
     content: string;
 }
 
+export interface ReferenceData {
+    url: string;
+    title: string;
+    description: string;
+    keywords: string;
+}
+
 // ------------------------------------------------------------------
 // 1. Storyboard Logic (ChatGPT / Gemini)
 // ------------------------------------------------------------------
@@ -14,10 +21,10 @@ export const generateStoryboardPrompt = (
     topic: string,
     genre: string,
     duration: string,
-    // v3.0 New Params
     mood: string = '',
     targetAudience: string = '',
     characters: string = '',
+    refData: ReferenceData | null = null, // v4.0 New Param
     language: 'ko' | 'en' = 'ko'
 ): string => {
     const role = language === 'ko'
@@ -34,6 +41,17 @@ export const generateStoryboardPrompt = (
     if (targetAudience) context += `- 타겟 오디언스(Target Audience): ${targetAudience}\n  `;
     if (characters) context += `- 주요 등장인물(Key Characters): ${characters}\n  `;
 
+    // v4.0 URL Reference Injection
+    if (refData && refData.url) {
+        context += `
+  - 참고 자료(Reference Source):
+    - URL: ${refData.url}
+    - 제목: ${refData.title}
+    - 핵심 요약: ${refData.description}
+    - 키워드: ${refData.keywords}
+    `;
+    }
+
     const task = language === 'ko'
         ? `위 정보를 바탕으로 촬영을 위한 완벽한 영상 콘티(Storyboard)를 작성해주세요.`
         : `Create a perfect video storyboard based on the info above.`;
@@ -44,11 +62,10 @@ export const generateStoryboardPrompt = (
     2. 컬럼 구성: [씬 번호] | [화면 묘사] | [오디오/대사] | [카메라 워킹] | [예상 시간]
     3. '화면 묘사'는 시각적으로 매우 구체적이어야 하며, 설정된 분위기(${mood || '기본'})를 반영해야 합니다.
     4. '카메라 워킹'은 전문 용어(Drone pan, Close-up, Dolly zoom 등)를 사용하세요.
-    5. 마지막에는 각 씬을 AI 이미지/비디오 생성기로 만들기 위한 '장면별 영문 키워드 요약'을 덧붙여주세요.
+    ${refData ? `5. [중요] 참고 자료의 내용과 스타일을 적극적으로 시나리오에 반영하세요.` : ''}
+    6. 마지막에는 각 씬을 AI 이미지/비디오 생성기로 만들기 위한 '장면별 영문 키워드 요약'을 덧붙여주세요.
     `
-        : `
-    ... (English constraints omitted for brevity, assuming KO main) ...
-    `;
+        : `...`;
 
     return `
 # ${platform === 'gemini' ? 'Gemini' : 'ChatGPT'} Expert Prompt
@@ -81,20 +98,24 @@ export const generateMidjourneyExpertPrompt = (
     ar: string,
     stylize: number,
     weird: number,
-    // v3.0 New Params
     lighting: string = '',
-    camera: string = '', // Lens/Shot
+    camera: string = '',
     color: string = '',
-    texture: string = ''
+    texture: string = '',
+    refData: ReferenceData | null = null // v4.0 New Param
 ): string => {
     const core = wrapForAsset(description, 'image');
 
-    // Construct keywords from details
     let details = '';
     if (lighting) details += `${lighting}, `;
     if (camera) details += `${camera}, `;
     if (color) details += `${color} color palette, `;
     if (texture) details += `${texture}, `;
+
+    // v4.0 Inject Ref Data for styling
+    if (refData) {
+        details += `in the style of ${refData.title} (${refData.keywords}), `;
+    }
 
     const params = `--ar ${ar} --stylize ${stylize} --weird ${weird} --q 2 --v 6.0`;
     const defaultQuality = "8k resolution, highly detailed, unreal engine 5 render";
@@ -104,18 +125,23 @@ export const generateMidjourneyExpertPrompt = (
 
 export const generateVeoExpertPrompt = (
     description: string,
-    cameraMove: string, // Movement
+    cameraMove: string,
     resolution: '1080p' | '4k',
     useAudio: boolean,
-    // v3.0 New Params
     lighting: string = '',
-    mood: string = ''
+    mood: string = '',
+    refData: ReferenceData | null = null // v4.0 New Param
 ): string => {
     const core = wrapForAsset(description, 'video');
 
     let details = '';
     if (lighting) details += `${lighting} lighting, `;
     if (mood) details += `${mood} atmosphere, `;
+
+    // v4.0 Inject Ref Data
+    if (refData) {
+        details += `Referencing style from: ${refData.title} -- ${refData.description}, `;
+    }
 
     let prompt = `[Video Prompt]
 Concept: ${core}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { generateStoryboardPrompt } from '../../generators';
-import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { generateStoryboardPrompt, type ReferenceData } from '../../generators';
+import { Copy, Check, ChevronDown, ChevronUp, Link as LinkIcon, Loader2 } from 'lucide-react';
 
 interface StoryboardModeProps {
     platform: 'chatgpt' | 'gemini';
@@ -18,8 +18,57 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
     const [characters, setCharacters] = useState('');
     const [showAdvanced, setShowAdvanced] = useState(false);
 
+    // URL Grounding (v4.0)
+    const [url, setUrl] = useState('');
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [refData, setRefData] = useState<ReferenceData | null>(null);
+
     const [result, setResult] = useState('');
     const [copied, setCopied] = useState(false);
+
+    // Analyze URL Function
+    const handleAnalyzeUrl = async () => {
+        if (!url) return;
+        setIsAnalyzing(true);
+
+        try {
+            // Check environment (Local Dev workaround vs Vercel Prod)
+            // In local dev without 'vercel dev', /api won't work. We mock it for demonstration.
+            const isLocalhost = window.location.hostname === 'localhost';
+
+            let data;
+            if (isLocalhost && !import.meta.env.VITE_VERCEL_ENV) {
+                // Mock fetch for local dev review
+                await new Promise(r => setTimeout(r, 1500));
+                data = {
+                    success: true,
+                    data: {
+                        title: "Example Scifi Article",
+                        description: "A detailed analysis of cyberpunk trends in 2024.",
+                        keywords: "cyberpunk, neon, 2024, ai trend"
+                    }
+                };
+            } else {
+                const res = await fetch('/api/analyze-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                data = await res.json();
+            }
+
+            if (data.success) {
+                setRefData({ url, ...data.data });
+            } else {
+                alert('URL 분석 실패: ' + data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('분석 중 오류가 발생했습니다.');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
 
     const handleGenerate = () => {
         const prompt = generateStoryboardPrompt(
@@ -30,6 +79,7 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
             mood,
             targetAudience,
             characters,
+            refData, // Pass refData
             'ko'
         );
         setResult(prompt);
@@ -81,6 +131,47 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
                             style={{ width: '100%', padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--color-border)' }}
                         />
                     </div>
+                </div>
+
+                {/* v4.0 URL Reference Input */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>참고 자료 URL (Reference Grounding)</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                            type="text"
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                            placeholder="예: https://website.com/article (기사, 블로그 등)"
+                            style={{ flex: 1, padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--color-border)' }}
+                        />
+                        <button
+                            onClick={handleAnalyzeUrl}
+                            disabled={isAnalyzing || !url}
+                            style={{
+                                padding: '0 1.5rem',
+                                borderRadius: '8px',
+                                background: 'var(--color-secondary)',
+                                color: 'black',
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                cursor: url ? 'pointer' : 'not-allowed',
+                                opacity: url ? 1 : 0.5
+                            }}
+                        >
+                            {isAnalyzing ? <Loader2 size={18} className="spin" /> : <LinkIcon size={18} />}
+                            {isAnalyzing ? '분석 중...' : 'URL 분석'}
+                        </button>
+                    </div>
+
+                    {/* Analyzed Data Preview */}
+                    {refData && (
+                        <div style={{ marginTop: '0.5rem', padding: '0.8rem', borderRadius: '6px', background: 'rgba(0,255,136,0.1)', border: '1px solid var(--color-primary)', fontSize: '0.9rem', color: '#ddd' }}>
+                            <div style={{ fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.2rem' }}>✅ 분석 완료: {refData.title}</div>
+                            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', opacity: 0.8 }}>{refData.description}</div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Advanced Inputs Accordion */}
@@ -187,6 +278,10 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
                     </div>
                 )}
             </div>
+            <style>{`
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+      `}</style>
         </div>
     );
 };
