@@ -125,7 +125,8 @@ export const generateThumbnailPrompt = (
     topic: string,
     emotion: string,
     composition: string,
-    textSpace: boolean
+    textSpace: boolean,
+    srefUrl: string = ''
 ): string => {
     // Thumbnail Specific Logic
     let prompt = `/imagine prompt: YouTube Thumbnail for "${topic}", `;
@@ -134,7 +135,15 @@ export const generateThumbnailPrompt = (
     if (composition) prompt += `${composition} composition, `;
     if (textSpace) prompt += `composition with empty negative space on the side for text placement, `;
 
-    prompt += `eye-catching, viral style, 4k resolution, highly detailed, vivid colors --ar 16:9 --v 6.0 --no text, font, typography, watermark, letters, signature`;
+    prompt += `eye-catching, viral style, 4k resolution, highly detailed, vivid colors --ar 16:9 --v 6.0`;
+
+    // v9.0 Style Reference
+    if (srefUrl) {
+        prompt += ` --sref ${srefUrl} --sw 100`;
+    }
+
+    // v8.0 Clean Feed
+    prompt += ` --no text, font, typography, watermark, letters, signature`;
 
     return prompt;
 };

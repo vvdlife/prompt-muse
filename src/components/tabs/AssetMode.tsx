@@ -15,6 +15,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
     const [thumbEmotion, setThumbEmotion] = useState('surprised');
     const [thumbComposition, setThumbComposition] = useState('split_screen');
     const [thumbTextSpace, setThumbTextSpace] = useState(true);
+    const [thumbSref, setThumbSref] = useState('');
 
     // Midjourney States
     const [ar, setAr] = useState('16:9');
@@ -86,7 +87,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
         let prompt = '';
         if (platform === 'midjourney') {
             if (assetType === 'thumbnail') {
-                prompt = generateThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace);
+                prompt = generateThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace, thumbSref);
             } else {
                 prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture, refData);
             }
@@ -199,6 +200,20 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                                 <input type="checkbox" checked={thumbTextSpace} onChange={(e) => setThumbTextSpace(e.target.checked)} />
                                 텍스트 공간 확보 (Leave Negative Space for Text)
                             </label>
+                        </div>
+
+                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #444' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>
+                                스타일 따라하기 (Style Reference URL)
+                                <span style={{ fontSize: '0.8rem', color: 'var(--color-accent)', marginLeft: '0.5rem' }}>* 기존 대박 썸네일 URL을 넣으면 그림체를 복사합니다.</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={thumbSref}
+                                onChange={(e) => setThumbSref(e.target.value)}
+                                placeholder="예: https://cdn.discordapp.com/attachments/... (이미지 주소)"
+                                style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
+                            />
                         </div>
                     </div>
                 ) : (
