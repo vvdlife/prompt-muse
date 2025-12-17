@@ -148,6 +148,31 @@ export const generateThumbnailPrompt = (
     return prompt;
 };
 
+export const generateGeminiThumbnailPrompt = (
+    topic: string,
+    emotion: string,
+    composition: string,
+    textSpace: boolean
+): string => {
+    // Gemini (Imagen 3) Optimized Prompt
+    // Focus on natural language description and explicit constraints.
+
+    let prompt = `Create a high-quality YouTube thumbnail image for a video about "${topic}".\n\n`;
+
+    prompt += `[Visual Details]\n`;
+    if (emotion) prompt += `- The main subject should express a "${emotion}" emotion.\n`;
+    if (composition) prompt += `- Use a "${composition}" composition style.\n`;
+    if (textSpace) prompt += `- IMPORTANT: Leave empty negative space on one side of the image to allow for text placement in post-production. Do not fill the entire frame.\n`;
+
+    prompt += `\n[Style]\n`;
+    prompt += `- 4K resolution, hyper-realistic, vivid colors, eye-catching viral style.\n`;
+
+    prompt += `\n[Constraints]\n`;
+    prompt += `- Do NOT include any text, words, logos, or letters in the image. The image must be text-free.\n`;
+
+    return prompt;
+};
+
 export const generateVeoExpertPrompt = (
     description: string,
     cameraMove: string,

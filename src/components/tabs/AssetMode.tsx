@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generateMidjourneyExpertPrompt, generateVeoExpertPrompt, generateThumbnailPrompt, type ReferenceData } from '../../generators';
+import { generateMidjourneyExpertPrompt, generateVeoExpertPrompt, generateThumbnailPrompt, generateGeminiThumbnailPrompt, type ReferenceData } from '../../generators';
 import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Image as ImageIcon, LayoutTemplate } from 'lucide-react';
 
 interface AssetModeProps {
@@ -16,6 +16,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
     const [thumbComposition, setThumbComposition] = useState('split_screen');
     const [thumbTextSpace, setThumbTextSpace] = useState(true);
     const [thumbSref, setThumbSref] = useState('');
+    const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('midjourney');
 
     // Midjourney States
     const [ar, setAr] = useState('16:9');
@@ -87,7 +88,11 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
         let prompt = '';
         if (platform === 'midjourney') {
             if (assetType === 'thumbnail') {
-                prompt = generateThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace, thumbSref);
+                if (thumbEngine === 'gemini') {
+                    prompt = generateGeminiThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace);
+                } else {
+                    prompt = generateThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace, thumbSref);
+                }
             } else {
                 prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture, refData);
             }
@@ -170,7 +175,43 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                 {/* Thumbnail Specific Inputs */}
                 {assetType === 'thumbnail' && platform === 'midjourney' ? (
                     <div style={{ padding: '1.5rem', background: 'rgba(255, 0, 255, 0.05)', borderRadius: '8px', border: '1px solid var(--color-accent)' }}>
-                        <h4 style={{ marginBottom: '1rem', color: 'var(--color-accent)', fontWeight: 'bold' }}>썸네일 전용 설정 (Viral Formula)</h4>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <h4 style={{ color: 'var(--color-accent)', fontWeight: 'bold', margin: 0 }}>썸네일 전용 설정 (Viral Formula)</h4>
+
+                            {/* Generator Engine Toggle */}
+                            <div style={{ display: 'flex', background: '#000', borderRadius: '20px', padding: '2px' }}>
+                                <button
+                                    onClick={() => setThumbEngine('midjourney')}
+                                    style={{
+                                        padding: '0.3rem 0.8rem',
+                                        borderRadius: '18px',
+                                        background: thumbEngine === 'midjourney' ? 'var(--color-accent)' : 'transparent',
+                                        color: thumbEngine === 'midjourney' ? 'white' : '#666',
+                                        border: 'none',
+                                        fontSize: '0.8rem',
+                                        fontWeight: 600,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Midjourney
+                                </button>
+                                <button
+                                    onClick={() => setThumbEngine('gemini')}
+                                    style={{
+                                        padding: '0.3rem 0.8rem',
+                                        borderRadius: '18px',
+                                        background: thumbEngine === 'gemini' ? '#4dabf7' : 'transparent',
+                                        color: thumbEngine === 'gemini' ? 'white' : '#666',
+                                        border: 'none',
+                                        fontSize: '0.8rem',
+                                        fontWeight: 600,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Gemini
+                                </button>
+                            </div>
+                        </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div>
@@ -202,19 +243,21 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform }) => {
                             </label>
                         </div>
 
-                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #444' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>
-                                스타일 따라하기 (Style Reference URL)
-                                <span style={{ fontSize: '0.8rem', color: 'var(--color-accent)', marginLeft: '0.5rem' }}>* 기존 대박 썸네일 URL을 넣으면 그림체를 복사합니다.</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={thumbSref}
-                                onChange={(e) => setThumbSref(e.target.value)}
-                                placeholder="예: https://cdn.discordapp.com/attachments/... (이미지 주소)"
-                                style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
-                            />
-                        </div>
+                        {thumbEngine === 'midjourney' && (
+                            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #444' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>
+                                    스타일 따라하기 (Style Reference URL)
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--color-accent)', marginLeft: '0.5rem' }}>* 기존 대박 썸네일 URL을 넣으면 그림체를 복사합니다.</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={thumbSref}
+                                    onChange={(e) => setThumbSref(e.target.value)}
+                                    placeholder="예: https://cdn.discordapp.com/attachments/... (이미지 주소)"
+                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
+                                />
+                            </div>
+                        )}
                     </div>
                 ) : (
                     /* Existing Asset Controls */
