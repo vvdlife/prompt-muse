@@ -40,13 +40,16 @@ export const generateGeminiThumbnailPrompt = (
     emotion: string,
     composition: string,
     textSpace: boolean,
-    hasRefImage: boolean = false
+    hasRefImage: boolean = false,
+    customInstruction: string = ''
 ): string => {
     // v2.1 Expert PD Strategy: Step-by-Step Structured Prompting
     // We break down the instruction into clear, logical phases for the AI.
 
+    let prompt = '';
+
     if (hasRefImage) {
-        return `
+        prompt = `
 *** MISSION: HIGH-CTR YOUTUBE THUMBNAIL REMIX ***
 
 [PHASE 1: EXPERT ANALYSIS (DECONSTRUCTION)]
@@ -68,21 +71,10 @@ Now, you must transplant this "Winning Formula" into a completely new context.
 - **KEEP (The Skeleton)**: You MUST preserve the exact Layout, Camera Angle, Lighting Style, and Font Design of the reference.
 - **CHANGE (The Skin)**: Replace the actual subject and objects to match the new topic: "${topic}".
 - **TEXT**: If the reference has text, replace it with English or Korean text relevant to "${topic}". Match the font style perfectly.
-
-[PHASE 3: FINAL PRODUCTION GUIDE]
-Generate the final image with these specific directives:
-- **Main Subject**: A central figure or object representing "${topic}", posing with "${emotion}" emotion, placed exactly where the subject is in the reference.
-- **Background**: Relevant to "${topic}" but maintaining the same blur/focus ratio as the reference.
-- **Quality**: 8K Display, Hyper-realistic, Unreal Engine 5 Render, Ray Tracing, Vivid Colors.
-- **Negative Prompts**: Do not simply copy the pixels. Do not make the text messy. Do not deform hands/faces.
-
-[EXECUTE NOW]
-Create the definitive thumbnail for "${topic}" using the reference's DNA.
-`.trim();
-    }
-
-    // Standard Mode (No Reference Image) - Still structured
-    return `
+`;
+    } else {
+        // Standard Mode (No Reference Image)
+        prompt = `
 *** MISSION: BEST-IN-CLASS VIRAL THUMBNAIL ***
 
 [PHASE 1: VISUAL PLANNING]
@@ -95,12 +87,30 @@ You are designing a thumbnail for the topic: "${topic}".
 1. **Subject**: A high-quality, expressive subject appropriate for "${topic}".
 2. **Action**: Dynamic movement or strong facial expression conveying "${emotion}".
 3. **Lighting**: Professional Studio Lighting, Rim Lighting (Backlight) to separate subject from background.
+`;
+    }
 
-[PHASE 3: STYLE & RENDER]
-- **Style**: Viral YouTube Style (Vivid Saturation, High Contrast, Sharp Details).
-- **Tech Specs**: 8K Resolution, Hyper-realism, Cinema 4D Render style.
-- **Text**: You MAY include bold, short text (English/Korean) if it fits the composition. Use Impact-style bold fonts.
+    // [PHASE 2.5: USER SPECIAL DIRECTIVES] - Prioritized injection
+    if (customInstruction && customInstruction.trim().length > 0) {
+        prompt += `
+[PHASE 2.5: USER SPECIAL PRIORITY REQUESTS]
+**CRITICAL**: The user has provided specific override instructions. You MUST follow these above all else:
+"${customInstruction}"
+`;
+    }
 
-Create this image now.
+    // Common Phase 3 for both modes
+    prompt += `
+[PHASE 3: FINAL PRODUCTION GUIDE]
+Generate the final image with these specific directives:
+- **Main Subject**: A central figure or object representing "${topic}", posing with "${emotion}" emotion.
+- **Background**: Relevant to "${topic}" but maintaining high quality blur/focus ratio.
+- **Quality**: 8K Display, Hyper-realistic, Unreal Engine 5 Render, Ray Tracing, Vivid Colors.
+- **Negative Prompts**: Do not simply copy the pixels. Do not make the text messy. Do not deform hands/faces.
+
+[EXECUTE NOW]
+Create the definitive thumbnail for "${topic}".
 `.trim();
+
+    return prompt;
 };

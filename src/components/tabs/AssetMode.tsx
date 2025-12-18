@@ -21,7 +21,9 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
     const [thumbSref, setThumbSref] = useState('');
     const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('gemini'); // Default to Gemini
     const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
+    const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
     const [thumbImagePreview, setThumbImagePreview] = useState<string | null>(null);
+    const [thumbCustomInstruction, setThumbCustomInstruction] = useState(''); // v2.1 Custom Instruction
 
     // Midjourney States
     const [ar, setAr] = useState('16:9');
@@ -105,7 +107,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
         if (platform === 'midjourney') {
             if (assetType === 'thumbnail') {
                 if (thumbEngine === 'gemini') {
-                    prompt = generateGeminiThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace, !!thumbImageFile);
+                    prompt = generateGeminiThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace, !!thumbImageFile, thumbCustomInstruction);
                 } else {
                     prompt = generateThumbnailPrompt(description, thumbEmotion, thumbComposition, thumbTextSpace, thumbSref);
                 }
@@ -185,6 +187,20 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder={assetType === 'thumbnail' ? "예: 아이폰 16 vs 갤럭시 S24 비교 리뷰" : "예: 비 젖은 사이버펑크 도시의 네온 사인 아래 서 있는 로봇"}
                         style={{ width: '100%', minHeight: '100px', padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--color-border)', resize: 'vertical' }}
+                    />
+                </div>
+
+                {/* Additional Instructions (Optional) - v2.1 */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>
+                        추가 요청 사항 (Optional Instructions)
+                        <span style={{ fontSize: '0.8rem', color: '#888', marginLeft: '0.5rem' }}>* Expert PD의 기획보다 우선 반영됩니다.</span>
+                    </label>
+                    <textarea
+                        value={thumbCustomInstruction}
+                        onChange={(e) => setThumbCustomInstruction(e.target.value)}
+                        placeholder="예: 텍스트는 빨간색으로, 배경은 우주로, 글씨체는 궁서체로 등 구체적인 지시사항 입력"
+                        style={{ width: '100%', minHeight: '60px', padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid #444', resize: 'vertical', fontSize: '0.9rem' }}
                     />
                 </div>
 
