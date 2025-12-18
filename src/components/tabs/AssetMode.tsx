@@ -5,13 +5,18 @@ import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, I
 
 interface AssetModeProps {
     platform: 'midjourney' | 'veo3';
-    fixedAssetType?: 'default' | 'thumbnail'; // v13.0
+    // Optional: Force a specific asset type (e.g. 'thumbnail') regardless of internal toggle
+    fixedAssetType?: 'default' | 'thumbnail';
+    // v2.6 Pipeline integration
+    initialContext?: string; // For Veo3 (Script context)
+    initialTopic?: string;   // For Thumbnail (Topic context)
 }
 
-export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }) => {
+export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, initialContext = '', initialTopic = '' }) => {
+    const isVeo = platform === 'veo3';
     // v13.0: If fixedAssetType is provided, force that mode. Else default.
     const [assetType, setAssetType] = useState<'default' | 'thumbnail'>(fixedAssetType || 'default');
-    const [description, setDescription] = useState('');
+    const [description, setDescription] = useState(initialContext || initialTopic || '');
 
     // Thumbnail Mode State (v6.0)
     // v2.2 Simplified: Removed Emotion/Composition/TextSpace states as they are now defaults.

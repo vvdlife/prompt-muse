@@ -5,6 +5,9 @@ import { usePresets } from '../../hooks/usePresets';
 
 interface StoryboardModeProps {
     platform: 'chatgpt' | 'gemini';
+    // v2.6 Pipeline Integration
+    initialTopic?: string;
+    onScriptGenerate?: (script: string) => void;
 }
 
 interface StoryboardState {
@@ -15,9 +18,9 @@ interface StoryboardState {
     hookStrategy: string;
 }
 
-export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
-    // Core
-    const [topic, setTopic] = useState('');
+export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initialTopic = '', onScriptGenerate }) => {
+    // Core (Initialize with Global Topic)
+    const [topic, setTopic] = useState(initialTopic);
     const [genre, setGenre] = useState('');
     const [duration, setDuration] = useState('');
 

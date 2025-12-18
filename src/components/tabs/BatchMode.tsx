@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
 import { Copy, Check, Sparkles } from 'lucide-react';
 
-export const BatchMode: React.FC = () => {
-    const [topic, setTopic] = useState('');
+// v2.6 Pipeline Integration
+interface BatchModeProps {
+    initialTopic?: string;
+    onTopicChange?: (topic: string) => void;
+}
+
+export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopicChange }) => {
+    const [topic, setTopic] = useState(initialTopic);
+
+    // Sync local topic with parent
+    const handleTopicChange = (val: string) => {
+        setTopic(val);
+        if (onTopicChange) onTopicChange(val);
+    };
     const [result, setResult] = useState('');
     const [copied, setCopied] = useState(false);
 
@@ -75,7 +87,7 @@ Provide the output in a structured format (Markdown) that I can immediately use 
                     <input
                         type="text"
                         value={topic}
-                        onChange={(e) => setTopic(e.target.value)}
+                        onChange={(e) => handleTopicChange(e.target.value)}
                         placeholder="예: 아이폰 16 언박싱 및 리뷰"
                         style={{ width: '100%', padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--color-border)', fontSize: '1.1rem' }}
                     />
