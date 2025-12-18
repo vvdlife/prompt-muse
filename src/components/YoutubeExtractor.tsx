@@ -14,7 +14,17 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
     const [extractedUrl, setExtractedUrl] = useState<string | null>(null);
     const [retry, setRetry] = useState(false);
 
-    const handleExtract = () => {
+    // v2.1 Deep Dive Fix: Robust pre-check used to prevent 404s before rendering
+    const checkImageAvailability = (url: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+        });
+    };
+
+    const handleExtract = async () => {
         setError('');
         setExtractedUrl(null);
         setVideoId(null);
@@ -28,11 +38,27 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
 
         setVideoId(id);
         const thumbs = getThumbnailUrls(id);
-        // Default to maxres, will fallback if image fails load? 
-        // For simplicity, we assume maxres exists or user accepts lower quality.
-        // But to be safe, we can try to display maxres.
-        setExtractedUrl(thumbs.maxres);
-        if (onExtract) onExtract(thumbs.maxres);
+
+        // v2.1: Pre-validate MaxRes -> SD -> HQ
+        // This eliminates the visual "404 broken image" flicker entirely.
+        const candidates = [thumbs.maxres, thumbs.sd, thumbs.hq];
+
+        for (const candidate of candidates) {
+            const isAvailable = await checkImageAvailability(candidate);
+            if (isAvailable) {
+                setExtractedUrl(candidate);
+                if (onExtract) onExtract(candidate);
+
+                // If we fell back to lower quality, show the message
+                if (candidate !== thumbs.maxres) {
+                    setRetry(true);
+                }
+                return;
+            }
+        }
+
+        // If all failed
+        setError('썸네일을 불러올 수 없습니다 (모든 화질 실패).');
     };
 
     const handleApply = () => {

@@ -19,7 +19,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
     const [thumbComposition, setThumbComposition] = useState('split_screen');
     const [thumbTextSpace, setThumbTextSpace] = useState(true);
     const [thumbSref, setThumbSref] = useState('');
-    const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('midjourney');
+    const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('gemini'); // Default to Gemini
     const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
     const [thumbImagePreview, setThumbImagePreview] = useState<string | null>(null);
 
@@ -194,50 +194,34 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                             <h4 style={{ color: 'var(--color-accent)', fontWeight: 'bold', margin: 0 }}>썸네일 전용 설정 (Viral Formula)</h4>
 
-                            {/* Generator Engine Toggle */}
-                            <div style={{ display: 'flex', background: '#000', borderRadius: '20px', padding: '2px' }}>
-                                <button
-                                    onClick={() => setThumbEngine('midjourney')}
-                                    style={{
-                                        padding: '0.3rem 0.8rem',
-                                        borderRadius: '18px',
-                                        background: thumbEngine === 'midjourney' ? 'var(--color-accent)' : 'transparent',
-                                        color: thumbEngine === 'midjourney' ? 'white' : '#666',
-                                        border: 'none',
-                                        fontSize: '0.8rem',
-                                        fontWeight: 600,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Midjourney
-                                </button>
-                                <button
-                                    onClick={() => setThumbEngine('gemini')}
-                                    style={{
-                                        padding: '0.3rem 0.8rem',
-                                        borderRadius: '18px',
-                                        background: thumbEngine === 'gemini' ? '#4dabf7' : 'transparent',
-                                        color: thumbEngine === 'gemini' ? 'white' : '#666',
-                                        border: 'none',
-                                        fontSize: '0.8rem',
-                                        fontWeight: 600,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Gemini
-                                </button>
-                            </div>
+                            {/* Generator Engine Toggle REMOVED */}
                         </div>
 
                         {/* v14.0 YouTube Thumbnail Extractor Integration */}
                         <YoutubeExtractor
-                            onApplyStyle={(url) => {
-                                setThumbSref(url);
-                                setThumbEngine('midjourney');
-                                // Could add a toast here, but state change is visible enough
-                                alert('스타일이 적용되었습니다! (Midjourney Mode로 전환됨)');
+                            onApplyStyle={async (url) => {
+                                try {
+                                    // v14.1 Gemini Bridge: Fetch URL and convert to File
+                                    const response = await fetch(url);
+                                    const blob = await response.blob();
+                                    const file = new File([blob], "youtube_thumbnail.jpg", { type: "image/jpeg" });
+
+                                    setThumbImageFile(file);
+                                    setThumbImagePreview(url);
+                                    setThumbEngine('gemini');
+
+                                    alert('스타일이 적용되었습니다! (Gemini 이미지 복제 모드)');
+                                } catch (e) {
+                                    console.error("Image fetch failed", e);
+                                    alert('이미지를 불러오는데 실패했습니다. URL을 확인해주세요.');
+                                }
                             }}
                         />
+
+                        {/* Engine Selection: REMOVED by user request (Gemini Only) */}
+                        {/* 
+                         <div style={{ display: 'flex', ... }}> ... </div>
+                        */}
 
                         {/* v12.0 Hide manual options if Gemini Image Ref is active */}
                         {!(thumbEngine === 'gemini' && thumbImagePreview) && (
