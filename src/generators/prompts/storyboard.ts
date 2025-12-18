@@ -7,6 +7,7 @@ export const generateStoryboardPrompt = (
   duration: string,
   structure: string = 'viral_hook', // v2.5 Narrative Architect
   hookStrategy: string = '',       // v2.5 Narrative Architect
+  customInstruction: string = '',  // v2.7 User Override
   refData: ReferenceData | null = null,
   _language: 'ko' | 'en' = 'ko'
 ): string => {
@@ -73,6 +74,8 @@ export const generateStoryboardPrompt = (
     Design a masterclass-level video script and storyboard.
     Your goal is to ensure the viewer does NOT click away in the first 30 seconds (Retention).
     Follow the **[${structure}]** framework strictly.
+    
+    ${customInstruction ? `**USER SPECIAL REQUEST (PRIORITY):** ${customInstruction}` : ''}
     `;
 
   const constraints = `

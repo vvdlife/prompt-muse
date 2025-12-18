@@ -27,6 +27,7 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
     // v2.5 Narrative Architect (Replaces Advanced v3.0)
     const [structure, setStructure] = useState('viral_hook');
     const [hookStrategy, setHookStrategy] = useState('');
+    const [customInstruction, setCustomInstruction] = useState(''); // v2.7 User Override
     const [showAdvanced, setShowAdvanced] = useState(true); // Default open for importance
 
     // URL Grounding (v4.0)
@@ -105,6 +106,7 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
             duration,
             structure,
             hookStrategy,
+            customInstruction,
             refData,
             'ko'
         );
@@ -296,6 +298,21 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
                             </div>
                         </div>
                     )}
+                    )}
+                </div>
+
+                {/* v2.7 Custom User Instruction */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>
+                        추가 요청 사항 (Producer Direction)
+                        <span style={{ fontSize: '0.8rem', color: '#888', marginLeft: '0.5rem' }}>* AI의 기획보다 우선 반영됩니다.</span>
+                    </label>
+                    <textarea
+                        value={customInstruction}
+                        onChange={(e) => setCustomInstruction(e.target.value)}
+                        placeholder="예: 전체적으로 진지한 톤으로 작성해줘. 마지막에 쿠키 영상 아이디어도 포함해줘."
+                        style={{ width: '100%', minHeight: '80px', padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid #444', resize: 'vertical', fontSize: '0.9rem' }}
+                    />
                 </div>
 
                 <button

@@ -15,6 +15,7 @@ export const generateMidjourneyExpertPrompt = (
     channelPreset: string = '', // v2.5: Replaces 'camera' input
     color: string = '',
     texture: string = '',
+    customInstruction: string = '', // v2.7 User Override
     refData: ReferenceData | null = null
 ): string => {
     // v2.5 EXPERT PD MODE: CHANNEL CONSULTANT
@@ -44,6 +45,11 @@ export const generateMidjourneyExpertPrompt = (
     // v4.0 Inject Ref Data for styling
     if (refData) {
         details += `in the style of ${refData.title} (${refData.keywords}), `;
+    }
+
+    // v2.7 Inject Custom Instruction
+    if (customInstruction) {
+        details += ` ${customInstruction}, `;
     }
 
     // Combine Core + Channel Preset + Details

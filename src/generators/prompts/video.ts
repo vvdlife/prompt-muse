@@ -9,8 +9,10 @@ export const generateVeoExpertPrompt = (
     shotFunction: string, // v2.5 Copilot: Replaces 'cameraMove'
     resolution: '1080p' | '4k',
     useAudio: boolean,
+    useAudio: boolean,
     lighting: string = '',
     mood: string = '',
+    customInstruction: string = '', // v2.7 User Override
     refData: ReferenceData | null = null
 ): string => {
     // v2.5 EXPERT PD MODE: B-ROLL DIRECTOR
@@ -42,6 +44,11 @@ export const generateVeoExpertPrompt = (
     // v4.0 Inject Ref Data
     if (refData) {
         details += `Referencing style from: ${refData.title} -- ${refData.description}, `;
+    }
+
+    // v2.7 Inject Custom Instruction
+    if (customInstruction) {
+        details += `\nCRITICAL USER INSTRUCTION: ${customInstruction}`;
     }
 
     let prompt = `[Video Prompt - B-Roll Director Mode]

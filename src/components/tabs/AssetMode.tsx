@@ -118,11 +118,11 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                 );
             } else {
                 // v2.5 Channel Consultant: 'lens' state now holds 'channelPreset'
-                prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture, refData);
+                prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture, thumbCustomInstruction, refData);
             }
         } else {
             // v2.5 B-Roll Director: 'camera' state now holds 'shotFunction'
-            prompt = generateVeoExpertPrompt(description, camera, resolution, useAudio, lighting, lens, refData);
+            prompt = generateVeoExpertPrompt(description, camera, resolution, useAudio, lighting, lens, thumbCustomInstruction, refData);
         }
         setResult(prompt);
     };
