@@ -66,7 +66,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                     </button>
                     <button
                         onClick={() => setAssetType('thumbnail')}
-                        className={`btn-toggle ${assetType === 'thumbnail' ? 'active-accent' : ''}`}
+                        className="btn-toggle"
                     >
                         <LayoutTemplate size={18} /> 썸네일 스튜디오
                     </button>
