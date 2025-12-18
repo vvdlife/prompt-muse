@@ -13,27 +13,24 @@ export const generateMidjourneyExpertPrompt = (
     stylize: number,
     weird: number,
     lighting: string = '',
-    channelPreset: string = '', // v2.5: Replaces 'camera' input
+    lens: string = '', // v3.0: Replaces 'channelPreset'
     color: string = '',
     texture: string = '',
     customInstruction: string = '', // v2.7 User Override
     refData: ReferenceData | null = null
 ): string => {
     // v2.5 EXPERT PD MODE: CHANNEL CONSULTANT
-    // Apply Channel Branding Presets
-    let styleGuide = '';
-    switch (channelPreset) {
-        case 'Tech / Minimal':
-            styleGuide = 'Minimalist, clean Apple-like aesthetic, matte finish, soft studio lighting, white and grey tones';
-            break;
-        case 'Gaming / Neon':
-            styleGuide = 'Cyberpunk vivid colors, high contrast, neon glow, dynamic energy, esports style';
-            break;
-        case 'Lifestyle / Cozy':
-            styleGuide = 'Warm film grain, natural sunlight, kinfolk magazine style, soft focus, pastel tones';
-            break;
-        default:
-            styleGuide = 'High quality professional photography';
+    // Apply Lens/Style Presets
+    let lensGuide = '';
+    if (lens) {
+        lensGuide = `${lens} lens`;
+        if (lens.includes('Wide')) lensGuide += ', expansive field of view, distortion at edges';
+        if (lens.includes('Telephoto')) lensGuide += ', compressed background, bokeh effect, isolation of subject';
+        if (lens.includes('Macro')) lensGuide += ', extreme close-up, visible textures, sharp focus';
+        if (lens.includes('Fisheye')) lensGuide += ', spherical distortion, ultra-wide dynamic perspective';
+        if (lens.includes('35mm')) lensGuide += ', cinematic film look, natural perspective, analog feel';
+    } else {
+        lensGuide = 'High quality professional photography, 50mm standard lens';
     }
 
     const core = wrapForAsset(description, 'image');
@@ -53,8 +50,8 @@ export const generateMidjourneyExpertPrompt = (
         details += ` ${customInstruction}, `;
     }
 
-    // Combine Core + Channel Preset + Details
-    const finalPrompt = `${core}, ${styleGuide}, ${details}`;
+    // Combine Core + Lens Preset + Details
+    const finalPrompt = `${core}, ${lensGuide}, ${details}`;
 
     // Parse model string to get version tag (Simple heuristic)
     // "v7.2 (Photorealism)" -> "--v 7.2"

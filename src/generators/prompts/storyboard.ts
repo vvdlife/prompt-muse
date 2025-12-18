@@ -42,6 +42,39 @@ export const generateStoryboardPrompt = (
 3. **Solution**: Your unique insight/method.
 4. **Proof**: Why it works.`;
       break;
+    case 'listicle':
+      structureGuide = `
+**Frame**: "The Listicle" (Focus: Retention & Pace)
+1. **Intro**: "Top N things about [Topic]".
+2. **Items 1-(N-1)**: Rapid fire, building interest.
+3. **The Best Item**: Saved for last to keep retention.
+4. **Recap/Outro**: Quick summary.`;
+      break;
+    case 'day_in_life':
+      structureGuide = `
+**Frame**: "Vlog / Day in Life" (Focus: Authenticity)
+1. **The Wake Up/Start**: Establishing the mood.
+2. **The Goal**: What are we doing today?
+3. **The Journey**: Montage of activities.
+4. **The Reflection**: End of day thoughts.`;
+      break;
+    case 'behind_scenes':
+      structureGuide = `
+**Frame**: "Behind The Scenes" (Focus: Curiosity)
+1. **The Finished Product**: Show the result first.
+2. **The "Before"**: How it started (Messy/Raw).
+3. **The Process**: Time-lapse or step-by-step.
+4. **The Reveal**: Final comparison.`;
+      break;
+    case 'review_unboxing':
+      structureGuide = `
+**Frame**: "Review & Unboxing" (Focus: Detail & Honesty)
+1. **The Box/Product**: First impressions.
+2. **Unboxing ASMR**: Sensory details.
+3. **Feature Deep Dive**: Testing key claims.
+4. **Pros & Cons**: Balanced verdict.
+5. **Final Rating**: Buy or Skip?`;
+      break;
     default:
       structureGuide = `Standard YouTube Structure (Intro -> Body -> Conclusion)`;
   }
@@ -49,9 +82,13 @@ export const generateStoryboardPrompt = (
   let hookGuide = '';
   if (hookStrategy) {
     hookGuide = `\n**CRITICAL STRATEGY - OPENING HOOK**: Use the "${hookStrategy}" technique.
-        - If "Negative Hook": Start with a warning or mistake ("Stop doing this...").
-        - If "Visual Spectacle": Start with the most impressive shot, no talking.
-        - If "Curiosity Gap": Show the result first, then ask "How?";`;
+        - "Negative Hook": Start with a warning ("Stop doing this...").
+        - "Visual Spectacle": Start with the most impressive shot, no talking.
+        - "Curiosity Gap": Show the result first, then ask "How?".
+        - "Visual Loop": A satisfying, seamless loop transition.
+        - "Shocking Fact": "Did you know 99% of people...".
+        - "Story Start": "It was a rainy Tuesday...".
+        - "Direct Challenge": "I bet you can't watch this without..."`;
   }
 
   let context = `

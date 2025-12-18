@@ -148,7 +148,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
             prompt = generateVeoExpertPrompt(
                 description,
                 localModel, // v14.0
-                camera, resolution, useAudio, lighting, lens, thumbCustomInstruction, refData
+                camera, resolution, useAudio, lighting, lens, '', thumbCustomInstruction, refData
             );
         }
         setResult(prompt);
@@ -506,6 +506,10 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                             <option value="Detail Texture">감성/디테일 (Detail Texture)</option>
                                             <option value="Reaction/Emotion">인물 리액션 (Reaction/Emotion)</option>
                                             <option value="Action/Transition">빠른 전환/액션 (Action/Transition)</option>
+                                            <option value="Slow Motion">슬로우 모션 (Slow Motion)</option>
+                                            <option value="Hyperlapse">하이퍼랩스 (Hyperlapse)</option>
+                                            <option value="Drone Shot">드론 촬영 (Drone View)</option>
+                                            <option value="Handheld">핸드헬드 (Handheld/Shake)</option>
                                         </select>
                                     </div>
 
@@ -553,7 +557,12 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                             <option value="">기본 (Default)</option>
                                             <option value="Golden Hour">Golden Hour (황금 시간대)</option>
                                             <option value="Cyberpunk Neon">Cyberpunk Neon (네온)</option>
-                                            <option value="Studio Softbox">Studio Softbox (스튜디오)</option>
+                                            <option value="Studio Softbox">Studio Softbox (부드러운 조명)</option>
+                                            <option value="Cinematic Lighting">Cinematic (영화적 조명)</option>
+                                            <option value="Natural Sunlight">Natural Sunlight (자연광)</option>
+                                            <option value="Dark Noir">Dark Noir (느와르/어두움)</option>
+                                            <option value="Volumetric Fog">Volumetric Fog (안개 효과)</option>
+                                            <option value="Hard Shadows">Hard Shadows (강한 그림자)</option>
                                         </select>
                                     </div>
                                     <div>
@@ -562,6 +571,9 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                             <option value="">기본 (Default)</option>
                                             <option value="Wide Angle">Wide Angle (광각/웅장함)</option>
                                             <option value="Telephoto">Telephoto (망원/인물집중)</option>
+                                            <option value="Macro">Macro (접사/디테일)</option>
+                                            <option value="Fisheye">Fisheye (어안 렌즈)</option>
+                                            <option value="35mm Film">35mm Film (필름 감성)</option>
                                         </select>
                                     </div>
                                     {localPlatform === 'midjourney' && (
@@ -571,7 +583,11 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                                 <select value={color} onChange={(e) => setColor(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
                                                     <option value="">기본 (Default)</option>
                                                     <option value="Vibrant High Saturation">Vibrant (강렬함)</option>
+                                                    <option value="Pastel Tones">Pastel (파스텔톤)</option>
                                                     <option value="Black and White">Black & White (흑백)</option>
+                                                    <option value="Sepia Vintage">Sepia (빈티지)</option>
+                                                    <option value="Cool Blue">Cool Blue (차가움)</option>
+                                                    <option value="Warm Orange">Warm Orange (따뜻함)</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -579,7 +595,11 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                                 <select value={texture} onChange={(e) => setTexture(e.target.value)} style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}>
                                                     <option value="">기본 (Realism)</option>
                                                     <option value="Oil Painting">Oil Painting (유화)</option>
+                                                    <option value="Watercolor">Watercolor (수채화)</option>
                                                     <option value="3D Render Pixar Style">3D Render (픽사풍)</option>
+                                                    <option value="Ukiyoe">Ukiyoe (일본 판화)</option>
+                                                    <option value="Cyberpunk Digital">Cyberpunk Digital (디지털 아트)</option>
+                                                    <option value="Pencil Sketch">Pencil Sketch (연필 스케치)</option>
                                                 </select>
                                             </div>
                                         </>

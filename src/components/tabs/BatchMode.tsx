@@ -14,8 +14,21 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
     const [longFormCount, setLongFormCount] = useState(1);
     const [shortFormCount, setShortFormCount] = useState(3);
     const [longFormTopics, setLongFormTopics] = useState('');
-    const [shortFormTopics, setShortFormTopics] = useState('');
+    const [shortFormTopicsList, setShortFormTopicsList] = useState<string[]>(Array(3).fill(''));
     const [showConfig, setShowConfig] = useState(false);
+
+    // Resize topics list when count changes
+    React.useEffect(() => {
+        setShortFormTopicsList(prev => {
+            const currentLength = prev.length;
+            if (currentLength === shortFormCount) return prev;
+            if (currentLength < shortFormCount) {
+                return [...prev, ...Array(shortFormCount - currentLength).fill('')];
+            } else {
+                return prev.slice(0, shortFormCount);
+            }
+        });
+    }, [shortFormCount]);
 
     // Sync local topic with parent
     const handleTopicChange = (val: string) => {
@@ -27,7 +40,7 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
 
     const generateWeeklyStrategyPrompt = (topic: string) => {
         const longTopicsList = longFormTopics.split('\n').filter((t: string) => t.trim()).map((t: string) => `- Specified Topic: ${t}`).join('\n');
-        const shortTopicsList = shortFormTopics.split('\n').filter((t: string) => t.trim()).map((t: string) => `- Specified Topic: ${t}`).join('\n');
+        const shortTopicsList = shortFormTopicsList.map((t, i) => t.trim() ? `- Short ${i + 1}: ${t}` : null).filter(Boolean).join('\n');
 
         return `
 # Weekly Content Strategy: "One-Source Multi-Use" (OSMU) Agent Role
@@ -148,13 +161,23 @@ Provide the output in a structured format (Markdown) that I can immediately use 
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem' }}>쇼츠 지정 주제 (줄바꿈으로 구분, 선택사항)</label>
-                                    <textarea
-                                        value={shortFormTopics}
-                                        onChange={(e) => setShortFormTopics(e.target.value)}
-                                        placeholder="예: 카메라 줌 기능 1분 요약&#13;&#10;배터리 타임 테스트 결과"
-                                        style={{ width: '100%', height: '60px', padding: '0.5rem', background: '#222', border: '1px solid #444', color: 'white', borderRadius: '4px', resize: 'vertical' }}
-                                    />
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem' }}>쇼츠 개별 주제 ({shortFormCount}개)</label>
+                                    <div style={{ display: 'grid', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto' }}>
+                                        {shortFormTopicsList.map((t, i) => (
+                                            <input
+                                                key={i}
+                                                type="text"
+                                                value={t}
+                                                onChange={(e) => {
+                                                    const newList = [...shortFormTopicsList];
+                                                    newList[i] = e.target.value;
+                                                    setShortFormTopicsList(newList);
+                                                }}
+                                                placeholder={`쇼츠 #${i + 1} 주제 입력...`}
+                                                style={{ width: '100%', padding: '0.5rem', background: '#222', border: '1px solid #444', color: 'white', borderRadius: '4px', fontSize: '0.9rem' }}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>

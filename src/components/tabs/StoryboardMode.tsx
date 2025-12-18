@@ -346,13 +346,19 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
                                 >
                                     <option value="viral_hook">Viral Hook (조회수/Retention 중심)</option>
-                                    <option value="storytelling">Storytelling Arc (몰입/공감 중심)</option>
-                                    <option value="educational">Problem-Solution (정보/설득 중심)</option>
+                                    <option value="storytelling">Hero's Journey (영웅의 여정)</option>
+                                    <option value="problem_solution">Problem-Solution (정보/설득 중심)</option>
+                                    <option value="listicle">Listicle (Top N 랭킹/리스트)</option>
+                                    <option value="day_in_life">Day in the Life (브이로그/일상)</option>
+                                    <option value="behind_scenes">Behind the Scenes (제작 과정/비하인드)</option>
+                                    <option value="educational">Educational/How-to (강의/튜토리얼)</option>
+                                    <option value="review_unboxing">Review & Unboxing (리뷰/언박싱)</option>
                                 </select>
                                 <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.4rem' }}>
-                                    * <strong>Viral Hook</strong>: 3초 안에 승부를 보는 숏폼/트렌드 영상에 적합<br />
-                                    * <strong>Storytelling</strong>: 브이로그, 드라마틱한 전개<br />
-                                    * <strong>Problem-Solution</strong>: 리뷰, 꿀팁, 강의 영상
+                                    * <strong>Viral Hook</strong>: 3초 안에 승부를 보는 숏폼/트렌드 영상<br />
+                                    * <strong>Hero's Journey</strong>: 몰입감 높은 스토리텔링<br />
+                                    * <strong>Listicle</strong>: 정보 전달 효율 극대화<br />
+                                    * <strong>Problem-Solution</strong>: 명확한 솔루션 제시
                                 </p>
                             </div>
 
@@ -368,6 +374,10 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
                                     <option value="Visual Spectacle">Visual Spectacle (압도적 영상미 시작)</option>
                                     <option value="Curiosity Gap">Curiosity Gap (결과 먼저 보여주기)</option>
                                     <option value="Relatable Pain">Relatable Pain ("이런 적 있으시죠?")</option>
+                                    <option value="Visual Loop">Visual Loop (무한 반복되는 시각적 만족감)</option>
+                                    <option value="Shocking Fact">Shocking Fact (충격적인 통계/사실)</option>
+                                    <option value="Story Start">Story Start ("제가 ~했을 때 일입니다")</option>
+                                    <option value="Direct Challenge">Direct Challenge ("~할 수 있으세요?")</option>
                                 </select>
                             </div>
                         </div>

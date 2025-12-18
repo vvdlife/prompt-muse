@@ -11,6 +11,7 @@ export const generateVeoExpertPrompt = (
     resolution: '1080p' | '4k',
     useAudio: boolean,
     lighting: string = '',
+    lens: string = '', // v3.0 Lens Control
     mood: string = '',
     customInstruction: string = '', // v2.7 User Override
     refData: ReferenceData | null = null
@@ -31,6 +32,18 @@ export const generateVeoExpertPrompt = (
         case 'Action/Transition':
             technicalCamera = 'Fast tracking shot, motion blur, dynamic whip pan';
             break;
+        case 'Slow Motion':
+            technicalCamera = 'High frame rate (60fps+), fluid slow motion capture, emotional resonance';
+            break;
+        case 'Hyperlapse':
+            technicalCamera = 'Time-lapse with motion, fast-forward energy, dynamic transition';
+            break;
+        case 'Drone Shot':
+            technicalCamera = 'Aerial view, smooth drone flight, bird\'s eye perspective';
+            break;
+        case 'Handheld':
+            technicalCamera = 'Handheld shake, raw documentary style, immediate presence';
+            break;
         default:
             technicalCamera = 'Cinematic smooth motion, 24fps';
     }
@@ -39,6 +52,7 @@ export const generateVeoExpertPrompt = (
 
     let details = '';
     if (lighting) details += `${lighting} lighting, `;
+    if (lens) details += `${lens} lens, `;
     if (mood) details += `${mood} atmosphere, `;
 
     // v4.0 Inject Ref Data
