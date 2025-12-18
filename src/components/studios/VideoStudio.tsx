@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 import { generateVeoExpertPrompt, type ReferenceData } from '../../generators';
-import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Clapperboard } from 'lucide-react';
+import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Clapperboard, Download, Upload } from 'lucide-react';
+import { useSettingsFile } from '../../hooks/useSettingsFile';
 import '../../App.css';
 
 interface VideoStudioProps {
     initialContext?: string;
+}
+
+interface VideoStudioState {
+    description: string;
+    model: string;
+    camera: string;
+    resolution: '1080p' | '4k';
+    useAudio: boolean;
+    lighting: string;
+    lens: string;
+    customInstruction: string;
+    url: string;
 }
 
 export const VideoStudio: React.FC<VideoStudioProps> = ({ initialContext = '' }) => {
@@ -30,6 +43,21 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ initialContext = '' })
 
     const [result, setResult] = useState('');
     const [copied, setCopied] = useState(false);
+
+    // File Presets (v4.1)
+    const { exportSettings, importSettings } = useSettingsFile<VideoStudioState>({
+        description, model, camera, resolution, useAudio, lighting, lens, customInstruction, url
+    }, (data) => {
+        if (data.description) setDescription(data.description);
+        if (data.model) setModel(data.model);
+        if (data.camera) setCamera(data.camera);
+        if (data.resolution) setResolution(data.resolution);
+        if (data.useAudio !== undefined) setUseAudio(data.useAudio);
+        if (data.lighting) setLighting(data.lighting);
+        if (data.lens) setLens(data.lens);
+        if (data.customInstruction) setCustomInstruction(data.customInstruction);
+        if (data.url) setUrl(data.url);
+    });
 
     const handleAnalyzeUrl = async () => {
         if (!url) return;
@@ -91,6 +119,16 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ initialContext = '' })
                 <div className="flex-between mb-sm">
                     <div className="flex-row text-secondary font-bold">
                         <Clapperboard size={20} /> Video Studio
+                    </div>
+                    {/* Preset Controls */}
+                    <div className="flex-row gap-xs">
+                        <button title="설정 파일로 저장" className="btn-icon" onClick={() => exportSettings('video_studio_config')}>
+                            <Download size={16} />
+                        </button>
+                        <label className="btn-icon" title="설정 파일 불러오기" style={{ cursor: 'pointer' }}>
+                            <Upload size={16} />
+                            <input type="file" accept=".json" onChange={importSettings} style={{ display: 'none' }} />
+                        </label>
                     </div>
                 </div>
                 <div>

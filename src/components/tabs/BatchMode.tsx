@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
 import { Copy, Check, Sparkles, Settings2 } from 'lucide-react';
 import { generateWeeklyStrategyPrompt } from '../../generators/prompts/batch';
+import { useSettingsFile } from '../../hooks/useSettingsFile';
+import { Download, Upload, Crosshair, TrendingUp } from 'lucide-react';
 import '../../App.css';
 
 // v2.6 Pipeline Integration
 interface BatchModeProps {
     initialTopic?: string;
     onTopicChange?: (topic: string) => void;
+}
+
+interface BatchSettings {
+    topic: string;
+    longFormCount: number;
+    shortFormCount: number;
+    longFormTopicsList: string[];
+    shortFormTopicsList: string[];
+    targetAudience: string;
+    benchmarkChannel: string;
 }
 
 export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopicChange }) => {
@@ -18,6 +30,23 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
     const [longFormTopicsList, setLongFormTopicsList] = useState<string[]>(['']); // Array state
     const [shortFormTopicsList, setShortFormTopicsList] = useState<string[]>(Array(3).fill('')); // Array state
     const [showConfig, setShowConfig] = useState(false);
+
+    // v4.0 Professional Strategy
+    const [targetAudience, setTargetAudience] = useState('');
+    const [benchmarkChannel, setBenchmarkChannel] = useState('');
+
+    // v4.1 Preset System
+    const { exportSettings, importSettings } = useSettingsFile<BatchSettings>({
+        topic, longFormCount, shortFormCount, longFormTopicsList, shortFormTopicsList, targetAudience, benchmarkChannel
+    }, (data) => {
+        setTopic(data.topic);
+        setLongFormCount(data.longFormCount);
+        setShortFormCount(data.shortFormCount);
+        setLongFormTopicsList(data.longFormTopicsList);
+        setShortFormTopicsList(data.shortFormTopicsList);
+        setTargetAudience(data.targetAudience || '');
+        setBenchmarkChannel(data.benchmarkChannel || '');
+    });
 
     // Resize SHORT topics list
     React.useEffect(() => {
@@ -59,7 +88,9 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
             longFormCount,
             shortFormCount,
             longFormTopicsList,
-            shortFormTopicsList
+            shortFormTopicsList,
+            targetAudience,
+            benchmarkChannel
         );
         setResult(prompt);
     };
@@ -71,10 +102,27 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
     };
 
     return (
-        <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem' }}>
-            <h3 className="text-gradient flex-row mb-md" style={{ fontSize: '1.5rem' }}>
-                <Sparkles color="var(--color-secondary)" /> 주간 기획 매니저 (Weekly Batch)
-            </h3>
+        <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem', position: 'relative' }}>
+            {/* Header with Preset Controls */}
+            <div className="flex-between mb-lg">
+                <h3 className="text-gradient flex-row" style={{ fontSize: '1.5rem', margin: 0 }}>
+                    <Sparkles color="var(--color-secondary)" /> 주간 기획 매니저 (Weekly Batch)
+                </h3>
+                <div className="flex-row gap-xs">
+                    <button
+                        onClick={() => exportSettings('batch_mode')}
+                        className="btn-icon"
+                        title="설정 파일로 저장"
+                    >
+                        <Download size={18} /> 저장
+                    </button>
+                    <label className="btn-icon" title="설정 파일 불러오기" style={{ cursor: 'pointer' }}>
+                        <Upload size={18} /> 불러오기
+                        <input type="file" accept=".json" onChange={importSettings} style={{ display: 'none' }} />
+                    </label>
+                </div>
+            </div>
+
             <p className="text-muted mb-lg">
                 하나의 주제로 <strong>롱폼 {longFormCount}개 + 쇼츠 {shortFormCount}개</strong>의 기획안을 한 번에 생성합니다. (OSMU 전략)
             </p>
@@ -89,6 +137,34 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
                         onChange={(e) => handleTopicChange(e.target.value)}
                         placeholder="예: 아이폰 16 언박싱 및 리뷰"
                     />
+                </div>
+
+                {/* Professional Strategy Inputs */}
+                <div className="grid-cols-2">
+                    <div>
+                        <label className="label-text flex-row gap-xs">
+                            <Crosshair size={14} /> 타겟 시청자 (Target Audience)
+                        </label>
+                        <input
+                            className="input-primary"
+                            type="text"
+                            value={targetAudience}
+                            onChange={(e) => setTargetAudience(e.target.value)}
+                            placeholder="예: 2030 사회 초년생 남성"
+                        />
+                    </div>
+                    <div>
+                        <label className="label-text flex-row gap-xs">
+                            <TrendingUp size={14} /> 벤치마킹 채널 (Reference)
+                        </label>
+                        <input
+                            className="input-primary"
+                            type="text"
+                            value={benchmarkChannel}
+                            onChange={(e) => setBenchmarkChannel(e.target.value)}
+                            placeholder="예: 잇섭, 신사임당 스타일"
+                        />
+                    </div>
                 </div>
 
                 {/* Configuration Toggle */}

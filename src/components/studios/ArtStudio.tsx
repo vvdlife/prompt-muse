@@ -1,10 +1,28 @@
-import React, { useState } from 'react';
 import { generateMidjourneyExpertPrompt, type ReferenceData } from '../../generators';
-import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Palette } from 'lucide-react';
+import { useSettingsFile } from '../../hooks/useSettingsFile';
+import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Palette, Download, Upload, User, Image as ImageIcon } from 'lucide-react';
 import '../../App.css';
 
 interface ArtStudioProps {
     initialContext?: string;
+}
+
+interface ArtSettings {
+    description: string;
+    model: string;
+    ar: string;
+    stylize: number;
+    weird: number;
+    lighting: string;
+    lens: string;
+    color: string;
+    texture: string;
+    customInstruction: string;
+    refData: ReferenceData | null;
+    cref: string;
+    cw: number;
+    sref: string;
+    sw: number;
 }
 
 export const ArtStudio: React.FC<ArtStudioProps> = ({ initialContext = '' }) => {
@@ -29,6 +47,33 @@ export const ArtStudio: React.FC<ArtStudioProps> = ({ initialContext = '' }) => 
     const [url, setUrl] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [refData, setRefData] = useState<ReferenceData | null>(null);
+
+    // v4.0 Professional Consistency
+    const [cref, setCref] = useState('');
+    const [cw, setCw] = useState(100);
+    const [sref, setSref] = useState('');
+    const [sw, setSw] = useState(1000);
+
+    // v4.1 Preset System
+    const { exportSettings, importSettings } = useSettingsFile<ArtSettings>({
+        description, model, ar, stylize, weird, lighting, lens, color, texture, customInstruction, refData, cref, cw, sref, sw
+    }, (data) => {
+        setDescription(data.description);
+        setModel(data.model);
+        setAr(data.ar);
+        setStylize(data.stylize);
+        setWeird(data.weird);
+        setLighting(data.lighting);
+        setLens(data.lens);
+        setColor(data.color);
+        setTexture(data.texture);
+        setCustomInstruction(data.customInstruction);
+        if (data.refData) setRefData(data.refData);
+        setCref(data.cref || '');
+        setCw(data.cw || 100);
+        setSref(data.sref || '');
+        setSw(data.sw || 1000);
+    });
 
     const [result, setResult] = useState('');
     const [copied, setCopied] = useState(false);
@@ -75,7 +120,8 @@ export const ArtStudio: React.FC<ArtStudioProps> = ({ initialContext = '' }) => 
         const prompt = generateMidjourneyExpertPrompt(
             description,
             model,
-            ar, stylize, weird, lighting, lens, color, texture, customInstruction, refData
+            ar, stylize, weird, lighting, lens, color, texture, customInstruction, refData,
+            cref, cw, sref, sw
         );
         setResult(prompt);
     };
@@ -93,6 +139,20 @@ export const ArtStudio: React.FC<ArtStudioProps> = ({ initialContext = '' }) => 
                 <div className="flex-between mb-sm">
                     <div className="flex-row text-accent font-bold">
                         <Palette size={20} /> Art Studio (Midjourney)
+                    </div>
+                    {/* Preset Buttons */}
+                    <div className="flex-row gap-xs">
+                        <button
+                            onClick={() => exportSettings('art_studio')}
+                            className="btn-icon"
+                            title="설정 파일로 저장"
+                        >
+                            <Download size={18} /> 저장
+                        </button>
+                        <label className="btn-icon" title="설정 파일 불러오기" style={{ cursor: 'pointer' }}>
+                            <Upload size={18} /> 불러오기
+                            <input type="file" accept=".json" onChange={importSettings} style={{ display: 'none' }} />
+                        </label>
                     </div>
                 </div>
                 <div>
@@ -123,6 +183,60 @@ export const ArtStudio: React.FC<ArtStudioProps> = ({ initialContext = '' }) => 
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="예: 비 젖은 사이버펑크 도시의 네온 사인 아래 서 있는 로봇"
                     />
+                </div>
+
+                {/* Professional Consistency Controls */}
+                <div className="panel-inner border border-accent/30">
+                    <h4 className="text-secondary flex-row mb-sm font-bold">
+                        🧩 캐릭터 및 스타일 일관성 (Consistency)
+                    </h4>
+                    <div className="grid-cols-2 gap-md">
+                        {/* Character Ref */}
+                        <div>
+                            <label className="label-text flex-row gap-xs">
+                                <User size={14} /> 캐릭터 참조 (--cref)
+                            </label>
+                            <input
+                                className="input-primary mb-xs"
+                                type="text"
+                                value={cref}
+                                onChange={(e) => setCref(e.target.value)}
+                                placeholder="이미지 URL (https://...)"
+                            />
+                            <div className="flex-between text-xs text-muted">
+                                <span>가중치 (--cw): {cw}</span>
+                            </div>
+                            <input
+                                type="range" min="0" max="100"
+                                value={cw}
+                                onChange={(e) => setCw(Number(e.target.value))}
+                                style={{ width: '100%' }}
+                            />
+                        </div>
+
+                        {/* Style Ref */}
+                        <div>
+                            <label className="label-text flex-row gap-xs">
+                                <ImageIcon size={14} /> 스타일 참조 (--sref)
+                            </label>
+                            <input
+                                className="input-primary mb-xs"
+                                type="text"
+                                value={sref}
+                                onChange={(e) => setSref(e.target.value)}
+                                placeholder="이미지 URL (https://...)"
+                            />
+                            <div className="flex-between text-xs text-muted">
+                                <span>가중치 (--sw): {sw}</span>
+                            </div>
+                            <input
+                                type="range" min="0" max="1000"
+                                value={sw}
+                                onChange={(e) => setSw(Number(e.target.value))}
+                                style={{ width: '100%' }}
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 {/* Additional Instructions */}

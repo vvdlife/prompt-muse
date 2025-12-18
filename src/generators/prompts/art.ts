@@ -17,7 +17,11 @@ export const generateMidjourneyExpertPrompt = (
     color: string = '',
     texture: string = '',
     customInstruction: string = '', // v2.7 User Override
-    refData: ReferenceData | null = null
+    refData: ReferenceData | null = null,
+    cref: string = '',
+    cw: number = 100,
+    sref: string = '',
+    sw: number = 1000
 ): string => {
     // v2.5 EXPERT PD MODE: CHANNEL CONSULTANT
     // Apply Lens/Style Presets
@@ -65,7 +69,11 @@ export const generateMidjourneyExpertPrompt = (
         versionParam = `--v ${vVer}`;
     }
 
-    const params = `--ar ${ar} --stylize ${stylize} --weird ${weird} --q 2 ${versionParam} --no text, watermark, signature, letters, typography, logo`;
+    let consistency = '';
+    if (cref) consistency += ` --cref ${cref} --cw ${cw}`;
+    if (sref) consistency += ` --sref ${sref} --sw ${sw}`;
+
+    const params = `--ar ${ar} --stylize ${stylize} --weird ${weird} --q 2 ${versionParam} ${consistency} --no text, watermark, signature, letters, typography, logo`;
     const defaultQuality = "8k resolution, highly detailed, unreal engine 5 render";
 
     return `/imagine prompt: ${finalPrompt} ${defaultQuality} ${params}`;

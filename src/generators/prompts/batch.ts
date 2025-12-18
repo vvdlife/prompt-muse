@@ -3,7 +3,9 @@ export const generateWeeklyStrategyPrompt = (
     longFormCount: number,
     shortFormCount: number,
     longFormTopicsList: string[],
-    shortFormTopicsList: string[]
+    shortFormTopicsList: string[],
+    targetAudience: string = '',
+    benchmarkChannel: string = ''
 ) => {
     const longTopicsList = longFormTopicsList.map((t, i) => t.trim() ? `- Specified Topic ${i + 1}: ${t}` : null).filter(Boolean).join('\n');
     const shortTopicsList = shortFormTopicsList.map((t, i) => t.trim() ? `- Short ${i + 1}: ${t}` : null).filter(Boolean).join('\n');
@@ -16,6 +18,10 @@ Your goal is to maximize the output of a single topic by creating a coherent sch
 
 ## Input Topic
 "${topic}"
+
+## Strategy Profile
+- **Target Audience**: ${targetAudience || 'General Audience'}
+- **Benchmarking Style**: ${benchmarkChannel || 'None specified'}
 
 ## Task
 Create a detailed content plan and script outlines for the following videos:
