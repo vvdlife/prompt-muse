@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { extractVideoId, getThumbnailUrls } from '../utils/youtube';
+import { extractVideoId } from '../utils/youtube';
 import { Search, Check } from 'lucide-react';
 
 interface YoutubeExtractorProps {
