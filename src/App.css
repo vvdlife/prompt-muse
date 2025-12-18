@@ -1,1 +1,206 @@
-/* App specific styles can go here, but mostly using index.css variables */
+/* Layout Utilities */
+.flex-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.grid-cols-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+
+/* Panels */
+.panel-sub {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+}
+
+.panel-inner {
+    padding: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+}
+
+/* Typography */
+.label-text {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #ccc;
+    font-size: 0.95rem;
+}
+
+.text-sm { font-size: 0.85rem; }
+.text-xs { font-size: 0.75rem; }
+.text-muted { color: var(--color-text-muted); }
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-accent { color: var(--color-accent); }
+
+/* Form Elements */
+.input-primary, .textarea-primary, .select-primary {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border: 1px solid var(--color-border);
+    transition: all 0.2s;
+}
+
+.input-primary:focus, .textarea-primary:focus, .select-primary:focus {
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.select-primary option {
+    background: #222;
+    color: white;
+}
+
+.textarea-primary {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary, .btn-accent {
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: black;
+    box-shadow: var(--glow-primary);
+}
+
+.btn-secondary {
+    background: var(--color-secondary);
+    color: black;
+    box-shadow: var(--glow-secondary);
+}
+
+.btn-accent {
+    background: var(--color-accent, #ff00ff);
+    color: white;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.btn-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Tabs & Toggles */
+.toggle-group {
+    display: flex;
+    gap: var(--spacing-sm);
+    background: #222;
+    padding: 0.4rem;
+    border-radius: 8px;
+}
+
+.btn-toggle {
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 6px;
+    color: #888;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-toggle.active-primary {
+    background: var(--color-primary);
+    color: black;
+}
+
+.btn-toggle.active-secondary {
+    background: var(--color-secondary);
+    color: black;
+}
+
+.btn-toggle.active-accent {
+    background: var(--color-accent);
+    color: white;
+}
+
+/* Result Box */
+.result-box {
+    width: 100%;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #e0e0e0;
+    font-family: monospace;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
