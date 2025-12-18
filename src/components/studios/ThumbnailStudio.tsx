@@ -134,7 +134,16 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                             setThumbImagePreview(url);
                             setThumbEngine('gemini');
 
-                            alert('스타일이 적용되었습니다! (Gemini 이미지 복제 모드)');
+                            // Auto-Copy to Clipboard
+                            try {
+                                const item = new ClipboardItem({ [blob.type]: blob });
+                                await navigator.clipboard.write([item]);
+                                alert('스타일이 적용되고 클립보드에 이미지가 복사되었습니다! (Ctrl+V로 사용 가능)');
+                            } catch (clipboardError) {
+                                console.error('Clipboard write failed', clipboardError);
+                                alert('스타일이 적용되었습니다! (클립보드 복사 실패 - 브라우저 권한 확인 필요)');
+                            }
+
                         } catch (e) {
                             console.error("Image fetch failed", e);
                             alert('이미지를 불러오는데 실패했습니다. URL을 확인해주세요.');
