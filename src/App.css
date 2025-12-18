@@ -1,4 +1,16 @@
-/* Layout Utilities */
+/* =========================================
+   CORE LAYOUT SYSTEM
+   ========================================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    position: relative;
+    padding-bottom: 150px;
+    /* Space for fixed footer */
+}
+
+/* Flexbox utilities */
 .flex-row {
     display: flex;
     align-items: center;
@@ -17,190 +29,415 @@
     align-items: center;
 }
 
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .flex-wrap {
     flex-wrap: wrap;
 }
 
+.w-full {
+    width: 100%;
+}
+
+.h-full {
+    height: 100%;
+}
+
+/* Grid utilities */
 .grid-cols-2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
 }
 
-.gap-sm { gap: var(--spacing-sm); }
-.gap-md { gap: var(--spacing-md); }
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-
-/* Panels */
-.panel-sub {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--color-border);
+/* Spacing utilities */
+.gap-xs {
+    gap: var(--spacing-xs);
 }
 
-.panel-inner {
-    padding: var(--spacing-sm);
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
+.gap-sm {
+    gap: var(--spacing-sm);
 }
 
-/* Typography */
-.label-text {
-    display: block;
+.gap-md {
+    gap: var(--spacing-md);
+}
+
+.gap-lg {
+    gap: var(--spacing-lg);
+}
+
+.mt-md {
+    margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+    margin-top: var(--spacing-lg);
+}
+
+.mb-sm {
+    margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+    margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+    margin-bottom: var(--spacing-lg);
+}
+
+.mb-xl {
+    margin-bottom: var(--spacing-xl);
+}
+
+.p-0 {
+    padding: 0 !important;
+}
+
+.p-4 {
+    padding: var(--spacing-sm);
+}
+
+.p-6 {
+    padding: var(--spacing-md);
+}
+
+/* =========================================
+   COMPONENT: HEADER
+   ========================================= */
+.header-container {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    position: relative;
+}
+
+.header-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
     margin-bottom: 0.5rem;
-    color: #ccc;
-    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, #fff 30%, var(--color-primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
-.text-sm { font-size: 0.85rem; }
-.text-xs { font-size: 0.75rem; }
-.text-muted { color: var(--color-text-muted); }
-.text-primary { color: var(--color-primary); }
-.text-secondary { color: var(--color-secondary); }
-.text-accent { color: var(--color-accent); }
-
-/* Form Elements */
-.input-primary, .textarea-primary, .select-primary {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-    border: 1px solid var(--color-border);
-    transition: all 0.2s;
+.header-subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.125rem;
+    font-weight: 400;
 }
 
-.input-primary:focus, .textarea-primary:focus, .select-primary:focus {
-    border-color: var(--color-primary);
-    background: rgba(255, 255, 255, 0.08);
+/* =========================================
+   COMPONENT: STEP INDICATOR
+   ========================================= */
+.step-indicator-container {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto 4rem;
 }
 
-.select-primary option {
-    background: #222;
-    color: white;
+/* The connecting line behind steps */
+.step-line-bg {
+    position: absolute;
+    top: 24px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-border);
+    z-index: 0;
 }
 
-.textarea-primary {
-    resize: vertical;
-    min-height: 100px;
+.step-item {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s;
 }
 
-/* Buttons */
-.btn-primary, .btn-secondary, .btn-accent {
-    padding: 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.2s;
+.step-item:hover {
+    transform: translateY(-2px);
+}
+
+.step-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
-    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.125rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    color: var(--color-text-muted);
 }
 
-.btn-primary {
+.step-item.active .step-circle {
     background: var(--color-primary);
+    border-color: var(--color-primary);
     color: black;
     box-shadow: var(--glow-primary);
+    transform: scale(1.1);
 }
 
-.btn-secondary {
-    background: var(--color-secondary);
-    color: black;
-    box-shadow: var(--glow-secondary);
+.step-item.completed .step-circle {
+    background: var(--color-surface-hover);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
-.btn-accent {
-    background: var(--color-accent, #ff00ff);
+.step-label {
+    margin-top: 0.8rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: color 0.3s;
+}
+
+.step-item.active .step-label {
     color: white;
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+    font-weight: 600;
 }
 
-.btn-icon {
+/* =========================================
+   COMPONENT: GLASS PANEL & CARDS
+   ========================================= */
+.glass-panel {
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+    padding: 2rem;
+    transition: border-color 0.2s;
+}
+
+.panel-sub {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* =========================================
+   COMPONENT: NAVIGATION FOOTER
+   ========================================= */
+.nav-footer {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.75rem 1rem;
+
+    background: rgba(24, 24, 27, 0.85);
+    /* Zinc 900 safe for text */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.nav-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    transition: background 0.2s;
-    cursor: pointer;
+    padding: 0.75rem 1.5rem;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s;
 }
 
-.btn-icon:hover {
-    background: rgba(255, 255, 255, 0.1);
+.nav-btn-prev {
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid transparent;
 }
 
-/* Tabs & Toggles */
-.toggle-group {
-    display: flex;
-    gap: var(--spacing-sm);
-    background: #222;
-    padding: 0.4rem;
+.nav-btn-prev:hover:not(:disabled) {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-btn-prev:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.nav-btn-next {
+    background: var(--color-primary);
+    color: black;
+    padding-right: 2rem;
+    padding-left: 2rem;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+.nav-btn-next:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+}
+
+.nav-btn-next:disabled {
+    background: var(--color-surface-hover);
+    color: var(--color-text-muted);
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
+/* =========================================
+   Inputs & Buttons
+   ========================================= */
+.input-primary,
+.textarea-primary,
+.select-primary {
+    width: 100%;
+    padding: 0.75rem 1rem;
     border-radius: 8px;
+    background: #09090b;
+    /* Darkest bg for input */
+    border: 1px solid var(--color-border);
+    color: white;
+    font-size: 0.95rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-primary:focus,
+.textarea-primary:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+    outline: none;
 }
 
 .btn-toggle {
     flex: 1;
-    padding: 0.6rem;
-    border-radius: 6px;
-    color: #888;
-    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    transition: all 0.2s;
 }
 
-.btn-toggle.active-primary {
-    background: var(--color-primary);
-    color: black;
-}
-
-.btn-toggle.active-secondary {
-    background: var(--color-secondary);
-    color: black;
-}
-
-.btn-toggle.active-accent {
-    background: var(--color-accent);
+.btn-toggle:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: #555;
     color: white;
 }
 
-/* Result Box */
-.result-box {
-    width: 100%;
-    padding: 1.5rem;
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    color: #e0e0e0;
-    font-family: monospace;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    border-left-width: 4px;
-    border-left-style: solid;
+.btn-toggle.active-primary {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
-/* Animations */
+.btn-toggle.active-accent {
+    background: rgba(217, 70, 239, 0.1);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.btn-accent {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: black;
+    transition: opacity 0.2s;
+}
+
+.btn-accent:hover {
+    opacity: 0.9;
+}
+
+.btn-accent:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--color-surface-hover);
+    color: #555;
+}
+
+/* Animation utilities */
 .fade-in {
-    animation: fadeIn 0.4s ease-out;
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.spin {
-    animation: spin 1s linear infinite;
+/* Session Controls */
+.session-controls {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    z-index: 50;
 }
 
-@keyframes spin {
-    100% { transform: rotate(360deg); }
+.btn-control {
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s;
+}
+
+.btn-control-reset {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    color: var(--color-text-muted);
+}
+
+.btn-control-reset:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-control-export {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--color-primary);
+}
+
+.btn-control-export:hover {
+    background: rgba(16, 185, 129, 0.2);
 }

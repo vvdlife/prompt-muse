@@ -15,11 +15,11 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
     // v14.0 Fine-grained Batch Controls
     const [longFormCount, setLongFormCount] = useState(1);
     const [shortFormCount, setShortFormCount] = useState(3);
-    const [longFormTopics, setLongFormTopics] = useState('');
-    const [shortFormTopicsList, setShortFormTopicsList] = useState<string[]>(Array(3).fill(''));
+    const [longFormTopicsList, setLongFormTopicsList] = useState<string[]>(['']); // Array state
+    const [shortFormTopicsList, setShortFormTopicsList] = useState<string[]>(Array(3).fill('')); // Array state
     const [showConfig, setShowConfig] = useState(false);
 
-    // Resize topics list when count changes
+    // Resize SHORT topics list
     React.useEffect(() => {
         setShortFormTopicsList(prev => {
             const currentLength = prev.length;
@@ -31,6 +31,19 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
             }
         });
     }, [shortFormCount]);
+
+    // Resize LONG topics list
+    React.useEffect(() => {
+        setLongFormTopicsList(prev => {
+            const currentLength = prev.length;
+            if (currentLength === longFormCount) return prev;
+            if (currentLength < longFormCount) {
+                return [...prev, ...Array(longFormCount - currentLength).fill('')];
+            } else {
+                return prev.slice(0, longFormCount);
+            }
+        });
+    }, [longFormCount]);
 
     // Sync local topic with parent
     const handleTopicChange = (val: string) => {
@@ -45,7 +58,7 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
             topic,
             longFormCount,
             shortFormCount,
-            longFormTopics,
+            longFormTopicsList,
             shortFormTopicsList
         );
         setResult(prompt);
@@ -103,14 +116,23 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
                                     />
                                 </div>
                                 <div>
-                                    <label className="label-text text-xs">롱폼 지정 주제 (줄바꿈으로 구분, 선택사항)</label>
-                                    <textarea
-                                        className="textarea-primary"
-                                        value={longFormTopics}
-                                        onChange={(e) => setLongFormTopics(e.target.value)}
-                                        placeholder="예: 아이폰 16 카메라 테스트&#13;&#10;아이폰 16 vs 15 비교"
-                                        style={{ height: '60px', minHeight: '60px' }}
-                                    />
+                                    <label className="label-text text-xs">롱폼 개별 주제 ({longFormCount}개)</label>
+                                    <div className="flex-col gap-xs" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                        {longFormTopicsList.map((t, i) => (
+                                            <input
+                                                key={i}
+                                                className="input-primary text-sm"
+                                                type="text"
+                                                value={t}
+                                                onChange={(e) => {
+                                                    const newList = [...longFormTopicsList];
+                                                    newList[i] = e.target.value;
+                                                    setLongFormTopicsList(newList);
+                                                }}
+                                                placeholder={`롱폼 #${i + 1} 주제 입력...`}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 

@@ -39,24 +39,24 @@ function App() {
   };
 
   return (
-    <div className="container" style={{ paddingBottom: '6rem' }}>
+    <div className="container">
       <Header />
 
       {/* Session Controls (Top Right) */}
-      <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 50 }}>
+      <div className="session-controls">
         <button
           onClick={clearSession}
-          style={{ padding: '0.5rem', background: '#333', border: '1px solid #555', color: '#aaa', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem' }}
+          className="btn-control btn-control-reset"
           title="초기화 (Reset)"
         >
           <RefreshCw size={14} /> 초기화
         </button>
         <button
           onClick={exportSession}
-          style={{ padding: '0.5rem 1rem', background: '#222', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', fontWeight: 'bold' }}
+          className="btn-control btn-control-export"
           title="프로젝트 내보내기 (Export)"
         >
-          <Download size={14} /> 프로젝트 저장 (.json)
+          <Download size={14} /> 프로젝트 저장
         </button>
       </div>
 
@@ -66,9 +66,9 @@ function App() {
       </div>
 
       {/* Step Progress Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem', position: 'relative', maxWidth: '800px', margin: '0 auto 3rem' }}>
+      <div className="step-indicator-container">
         {/* Connector Line */}
-        <div style={{ position: 'absolute', top: '24px', left: '0', right: '0', height: '2px', background: '#333', zIndex: 0 }} />
+        <div className="step-line-bg" />
 
         {steps.map((step) => {
           const isActive = currentStep === step.id;
@@ -78,25 +78,12 @@ function App() {
             <div
               key={step.id}
               onClick={() => setCurrentStep(step.id)}
-              style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
+              className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
             >
-              <div style={{
-                width: '48px', height: '48px', borderRadius: '50%',
-                background: isActive ? 'var(--color-primary)' : isCompleted ? '#444' : '#222',
-                border: isActive ? '4px solid rgba(0,0,0,0.5)' : '2px solid #444',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: isActive || isCompleted ? 'white' : '#666',
-                marginBottom: '0.8rem',
-                transition: 'all 0.3s ease',
-                boxShadow: isActive ? '0 0 20px var(--color-primary)' : 'none'
-              }}>
-                {isCompleted ? <CheckCircle2 size={24} /> : <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{step.id}</span>}
+              <div className="step-circle">
+                {isCompleted ? <CheckCircle2 size={24} /> : step.id}
               </div>
-              <span style={{
-                color: isActive ? 'white' : '#888',
-                fontWeight: isActive ? 700 : 400,
-                fontSize: '0.9rem'
-              }}>
+              <span className="step-label">
                 {step.title.split(' (')[0]}
               </span>
             </div>
@@ -134,6 +121,7 @@ function App() {
             <AssetMode
               platform="veo3"
               // @ts-ignore: Temporary pivot
+              fixedAssetType="default"
               initialContext={projectData.script || projectData.topic}
             />
           </div>
@@ -142,10 +130,10 @@ function App() {
         {/* Step 4: Packaging (Thumbnail/Art) */}
         {currentStep === 4 && (
           <div className="fade-in">
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}>
-              <div className="glass-panel" style={{ padding: '1rem', width: '100%', textAlign: 'center' }}>
-                <h3>🎨 썸네일 & 채널 아트</h3>
-                <p style={{ color: '#888' }}>마지막 포장은 클릭률(CTR)과 브랜딩의 핵심입니다.</p>
+            <div className="flex-center mb-lg">
+              <div className="glass-panel" style={{ padding: '1.5rem', width: '100%', textAlign: 'center', borderColor: 'var(--color-accent)' }}>
+                <h3 className="text-accent mb-sm">🎨 썸네일 & 채널 아트</h3>
+                <p className="text-muted">마지막 포장은 클릭률(CTR)과 브랜딩의 핵심입니다.</p>
               </div>
             </div>
             <AssetMode
@@ -159,42 +147,23 @@ function App() {
       </main>
 
       {/* Navigation Footer */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        padding: '1.5rem', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)',
-        borderTop: '1px solid #333', display: 'flex', justifyContent: 'center', gap: '2rem', zIndex: 100
-      }}>
+      <div className="nav-footer">
         <button
           onClick={handlePrev}
           disabled={currentStep === 1}
-          style={{
-            opacity: currentStep === 1 ? 0.3 : 1,
-            display: 'flex', alignItems: 'center', gap: '0.5rem',
-            padding: '0.8rem 2rem', background: 'transparent', color: 'white', border: '1px solid #555', borderRadius: '30px', cursor: 'pointer'
-          }}
+          className="nav-btn nav-btn-prev"
         >
-          <ChevronLeft size={20} /> 이전 단계 (Prev)
+          <ChevronLeft size={20} /> 이전
         </button>
 
         <button
           onClick={handleNext}
           disabled={currentStep === 4}
-          style={{
-            background: currentStep === 4 ? '#444' : 'var(--color-primary)',
-            color: 'white', border: 'none', borderRadius: '30px',
-            padding: '0.8rem 3rem', fontSize: '1.1rem', fontWeight: 'bold',
-            display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: currentStep === 4 ? 'default' : 'pointer',
-            boxShadow: currentStep === 4 ? 'none' : '0 0 20px rgba(var(--color-primary-rgb), 0.4)'
-          }}
+          className="nav-btn nav-btn-next"
         >
-          {currentStep === 4 ? '완료 (Finished)' : '다음 단계 (Next)'} <ChevronRight size={20} />
+          {currentStep === 4 ? '완료' : '다음'} <ChevronRight size={20} />
         </button>
       </div>
-
-      <style>{`
-        .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
     </div>
   );
 }

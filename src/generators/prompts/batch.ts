@@ -2,10 +2,10 @@ export const generateWeeklyStrategyPrompt = (
     topic: string,
     longFormCount: number,
     shortFormCount: number,
-    longFormTopics: string,
+    longFormTopicsList: string[],
     shortFormTopicsList: string[]
 ) => {
-    const longTopicsList = longFormTopics.split('\n').filter((t: string) => t.trim()).map((t: string) => `- Specified Topic: ${t}`).join('\n');
+    const longTopicsList = longFormTopicsList.map((t, i) => t.trim() ? `- Specified Topic ${i + 1}: ${t}` : null).filter(Boolean).join('\n');
     const shortTopicsList = shortFormTopicsList.map((t, i) => t.trim() ? `- Short ${i + 1}: ${t}` : null).filter(Boolean).join('\n');
 
     return `
