@@ -19,6 +19,12 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
     // Local State (Colocated)
     const [description, setDescription] = useState(initialTopic);
     const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('gemini'); // Default to Gemini
+
+    // v4.2 Customization State
+    const [emotion, setEmotion] = useState('Excited');
+    const [composition, setComposition] = useState('Dynamic');
+    const [textSpace, setTextSpace] = useState(true);
+
     const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
     const [thumbImagePreview, setThumbImagePreview] = useState<string | null>(null);
     const [thumbCustomInstruction, setThumbCustomInstruction] = useState('');
@@ -50,9 +56,9 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
     const handleGenerate = () => {
         const prompt = generateGeminiThumbnailPrompt(
             description,
-            'excited',      // Default Emotion
-            'dynamic',      // Default Composition
-            true,           // Default Text Space
+            emotion,
+            composition,
+            textSpace,
             !!thumbImageFile,
             thumbCustomInstruction
         );
@@ -106,6 +112,59 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                         placeholder="예: 아이폰 16 vs 갤럭시 S24 비교 리뷰"
                         style={{ minHeight: '80px' }}
                     />
+                </div>
+
+                {/* v4.2 Customization Controls */}
+                <div className="grid-cols-2 mb-md gap-md">
+                    <div>
+                        <label className="label-text">
+                            분위기/감정 (Emotion)
+                        </label>
+                        <select
+                            className="input-primary"
+                            value={emotion}
+                            onChange={(e) => setEmotion(e.target.value)}
+                        >
+                            <option value="Excited">🤩 Excited (신난/흥분된)</option>
+                            <option value="Shocked">😱 Shocked (충격적인)</option>
+                            <option value="Curious">🤔 Curious (궁금한/의문)</option>
+                            <option value="Angry">😡 Angry (화난/비판적)</option>
+                            <option value="Happy">😊 Happy (행복한/긍정적)</option>
+                            <option value="Sad">😢 Sad (슬픈/감성적)</option>
+                            <option value="Professional">👔 Professional (전문적인)</option>
+                            <option value="Dark">🌑 Dark (어두운/진지한)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="label-text">
+                            구도/구성 (Composition)
+                        </label>
+                        <select
+                            className="input-primary"
+                            value={composition}
+                            onChange={(e) => setComposition(e.target.value)}
+                        >
+                            <option value="Dynamic">⚡ Dynamic (역동적)</option>
+                            <option value="Rule of Thirds">📐 Rule of Thirds (3분할)</option>
+                            <option value="Center">🎯 Center (중앙 집중)</option>
+                            <option value="Close-up">🔍 Close-up (클로즈업)</option>
+                            <option value="Wide Shot">🏞️ Wide Shot (와이드 샷)</option>
+                            <option value="Diagonal">📉 Diagonal (대각선 구도)</option>
+                            <option value="Symmetry">⚖️ Symmetry (대칭)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="mb-md">
+                    <label className="flex-row gap-xs checkbox-label" style={{ cursor: 'pointer' }}>
+                        <input
+                            type="checkbox"
+                            checked={textSpace}
+                            onChange={(e) => setTextSpace(e.target.checked)}
+                            style={{ width: '16px', height: '16px' }}
+                        />
+                        <span>텍스트 공간 확보 (Negative Space for Text)</span>
+                    </label>
                 </div>
 
                 {/* Additional Instructions */}
@@ -192,10 +251,6 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                             }}
                                 className="overlay-hover" // We can add a class or just keep it simple
                             >
-                                {/* We'll keep it simple: Show always or on hover? 
-                                    User wants to click. Let's make it clear it's clickable.
-                                    Actually, let's keep the text minimal.
-                                */}
                             </div>
                         )}
 
@@ -267,7 +322,7 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
             {result && (
                 <div className="mt-lg fade-in">
                     <div className="flex-between mb-sm text-muted">
-                        <span>생성된 전문가 프롬프트 (Gemini)</span>
+                        <span>생성된 전문가 프롬프트 (Editable)</span>
                         <div className="flex-row">
                             <button
                                 onClick={handleOpenGemini}
@@ -286,8 +341,22 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                             </button>
                         </div>
                     </div>
-                    <div className="result-box" style={{ borderLeftColor: 'var(--color-accent)' }}>
-                        {result}
+                    {/* Editable Text Area for Result */}
+                    <div className="result-box" style={{ borderLeftColor: 'var(--color-accent)', padding: 0 }}>
+                        <textarea
+                            value={result}
+                            onChange={(e) => setResult(e.target.value)}
+                            className="textarea-primary"
+                            style={{
+                                width: '100%',
+                                minHeight: '300px',
+                                border: 'none',
+                                background: 'transparent',
+                                fontSize: '0.9rem',
+                                lineHeight: '1.5',
+                                resize: 'vertical'
+                            }}
+                        />
                     </div>
                 </div>
             )}
