@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { generateMidjourneyExpertPrompt, generateVeoExpertPrompt, generateThumbnailPrompt, generateGeminiThumbnailPrompt, type ReferenceData } from '../../generators';
+import { YoutubeExtractor } from '../YoutubeExtractor';
 import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Image as ImageIcon, LayoutTemplate } from 'lucide-react';
 
 interface AssetModeProps {
@@ -227,6 +228,16 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
                                 </button>
                             </div>
                         </div>
+
+                        {/* v14.0 YouTube Thumbnail Extractor Integration */}
+                        <YoutubeExtractor
+                            onApplyStyle={(url) => {
+                                setThumbSref(url);
+                                setThumbEngine('midjourney');
+                                // Could add a toast here, but state change is visible enough
+                                alert('스타일이 적용되었습니다! (Midjourney Mode로 전환됨)');
+                            }}
+                        />
 
                         {/* v12.0 Hide manual options if Gemini Image Ref is active */}
                         {!(thumbEngine === 'gemini' && thumbImagePreview) && (

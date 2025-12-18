@@ -12,6 +12,7 @@ export const generateThumbnailPrompt = (
     emotion: string,
     composition: string,
     textSpace: boolean,
+    // [Task: Youtube Extraction] Create src/utils/youtube.ts for YouTube URL parsing and thumbnail generation <!-- id: 0 -->
     srefUrl: string = ''
 ): string => {
     // Midjourney Specific Logic (v6.0 Strategy)
