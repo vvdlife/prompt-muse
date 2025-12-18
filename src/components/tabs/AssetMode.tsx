@@ -301,38 +301,126 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
                                     position: 'relative',
                                     overflow: 'hidden'
                                 }}>
-                                    {!thumbImagePreview && (
-                                        <>
-                                            <ImageIcon size={32} style={{ color: '#666', marginBottom: '0.5rem' }} />
-                                            <span style={{ fontSize: '0.9rem', color: '#888' }}>Click to upload JPG/PNG</span>
-                                        </>
-                                    )}
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileUpload}
-                                        style={{
+                                    {/* Actions for the selected image */}
+                                    {thumbImagePreview && (
+                                        <div style={{
                                             position: 'absolute',
                                             top: 0,
                                             left: 0,
                                             width: '100%',
                                             height: '100%',
-                                            opacity: 0,
-                                            cursor: 'pointer'
-                                        }}
-                                    />
-                                    {thumbImagePreview && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
-                                            background: 'rgba(0,0,0,0.7)',
-                                            padding: '0.5rem',
-                                            fontSize: '0.8rem'
+                                            background: 'rgba(0,0,0,0.6)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            gap: '0.8rem',
+                                            zIndex: 10
                                         }}>
-                                            이미지 선택됨 (Gemini에 함께 붙여넣으세요)
+                                            <div style={{ color: '#fff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                                                이미지 준비됨 (Ready)
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        const link = document.createElement('a');
+                                                        link.href = thumbImagePreview;
+                                                        link.download = 'gemini_reference.jpg';
+                                                        document.body.appendChild(link);
+                                                        link.click();
+                                                        document.body.removeChild(link);
+                                                    }}
+                                                    style={{
+                                                        padding: '0.5rem 1rem',
+                                                        borderRadius: '6px',
+                                                        background: '#fff',
+                                                        color: '#000',
+                                                        border: 'none',
+                                                        fontWeight: 'bold',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.3rem',
+                                                        fontSize: '0.8rem'
+                                                    }}
+                                                >
+                                                    <ImageIcon size={14} /> 다운로드
+                                                </button>
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.preventDefault();
+                                                        try {
+                                                            const response = await fetch(thumbImagePreview);
+                                                            const blob = await response.blob();
+                                                            await navigator.clipboard.write([
+                                                                new ClipboardItem({ [blob.type]: blob })
+                                                            ]);
+                                                            alert('클립보드에 복사되었습니다. (Gemini에 붙여넣으세요!)');
+                                                        } catch (err) {
+                                                            alert('복사 실패: 보안 문제로 다운로드 후 사용해주세요.');
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        padding: '0.5rem 1rem',
+                                                        borderRadius: '6px',
+                                                        background: 'var(--color-accent)',
+                                                        color: '#fff',
+                                                        border: 'none',
+                                                        fontWeight: 'bold',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.3rem',
+                                                        fontSize: '0.8rem'
+                                                    }}
+                                                >
+                                                    <Copy size={14} /> 복사 (Copy)
+                                                </button>
+                                            </div>
+
+                                            <button
+                                                onClick={() => {
+                                                    setThumbImagePreview(null);
+                                                    setThumbImageFile(null);
+                                                }}
+                                                style={{
+                                                    background: 'transparent',
+                                                    border: '1px solid #666',
+                                                    color: '#ccc',
+                                                    padding: '0.3rem 0.8rem',
+                                                    borderRadius: '4px',
+                                                    fontSize: '0.7rem',
+                                                    marginTop: '0.5rem',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                이미지 제거 (Clear)
+                                            </button>
                                         </div>
+                                    )}
+
+                                    {!thumbImagePreview && (
+                                        <>
+                                            <ImageIcon size={32} style={{ color: '#666', marginBottom: '0.5rem' }} />
+                                            <span style={{ fontSize: '0.9rem', color: '#888' }}>
+                                                Drop image here or Click to upload
+                                            </span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileUpload}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    opacity: 0,
+                                                    cursor: 'pointer'
+                                                }}
+                                            />
+                                        </>
                                     )}
                                 </div>
                             </div>
