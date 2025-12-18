@@ -320,63 +320,34 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
                                             <div style={{ color: '#fff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                                                 이미지 준비됨 (Ready)
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
                                                 <button
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        const link = document.createElement('a');
-                                                        link.href = thumbImagePreview;
-                                                        link.download = 'gemini_reference.jpg';
-                                                        document.body.appendChild(link);
-                                                        link.click();
-                                                        document.body.removeChild(link);
+                                                        if (thumbImagePreview) {
+                                                            window.open(thumbImagePreview, '_blank');
+                                                        }
                                                     }}
                                                     style={{
-                                                        padding: '0.5rem 1rem',
+                                                        padding: '0.6rem 1.2rem',
                                                         borderRadius: '6px',
-                                                        background: '#fff',
+                                                        background: 'var(--color-primary)',
                                                         color: '#000',
                                                         border: 'none',
                                                         fontWeight: 'bold',
                                                         cursor: 'pointer',
                                                         display: 'flex',
                                                         alignItems: 'center',
-                                                        gap: '0.3rem',
-                                                        fontSize: '0.8rem'
+                                                        gap: '0.5rem',
+                                                        fontSize: '0.9rem',
+                                                        boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
                                                     }}
                                                 >
-                                                    <ImageIcon size={14} /> 다운로드
+                                                    <ImageIcon size={16} /> 원본 이미지 새 창으로 열기
                                                 </button>
-                                                <button
-                                                    onClick={async (e) => {
-                                                        e.preventDefault();
-                                                        try {
-                                                            const response = await fetch(thumbImagePreview);
-                                                            const blob = await response.blob();
-                                                            await navigator.clipboard.write([
-                                                                new ClipboardItem({ [blob.type]: blob })
-                                                            ]);
-                                                            alert('클립보드에 복사되었습니다. (Gemini에 붙여넣으세요!)');
-                                                        } catch (err) {
-                                                            alert('복사 실패: 보안 문제로 다운로드 후 사용해주세요.');
-                                                        }
-                                                    }}
-                                                    style={{
-                                                        padding: '0.5rem 1rem',
-                                                        borderRadius: '6px',
-                                                        background: 'var(--color-accent)',
-                                                        color: '#fff',
-                                                        border: 'none',
-                                                        fontWeight: 'bold',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.3rem',
-                                                        fontSize: '0.8rem'
-                                                    }}
-                                                >
-                                                    <Copy size={14} /> 복사 (Copy)
-                                                </button>
+                                                <span style={{ color: '#aaa', fontSize: '0.8rem' }}>
+                                                    * 새 창에서 우클릭하여 '이미지 복사' 또는 '저장' 하세요.
+                                                </span>
                                             </div>
 
                                             <button
