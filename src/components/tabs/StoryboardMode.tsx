@@ -10,8 +10,9 @@ interface StoryboardModeProps {
 interface StoryboardState {
     genre: string;
     duration: string;
-    mood: string;
-    targetAudience: string;
+    // v2.5 Narrative Architect State
+    structure: string;
+    hookStrategy: string;
 }
 
 export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
@@ -20,11 +21,10 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
     const [genre, setGenre] = useState('');
     const [duration, setDuration] = useState('');
 
-    // Advanced (v3.0)
-    const [mood, setMood] = useState('');
-    const [targetAudience, setTargetAudience] = useState('');
-    const [characters, setCharacters] = useState('');
-    const [showAdvanced, setShowAdvanced] = useState(false);
+    // v2.5 Narrative Architect (Replaces Advanced v3.0)
+    const [structure, setStructure] = useState('viral_hook');
+    const [hookStrategy, setHookStrategy] = useState('');
+    const [showAdvanced, setShowAdvanced] = useState(true); // Default open for importance
 
     // URL Grounding (v4.0)
     const [url, setUrl] = useState('');
@@ -41,7 +41,7 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
 
     const handleSavePreset = () => {
         if (!newPresetName) return;
-        savePreset(newPresetName, { genre, duration, mood, targetAudience });
+        savePreset(newPresetName, { genre, duration, structure, hookStrategy });
         setNewPresetName('');
         setShowPresets(false);
     };
@@ -49,50 +49,12 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
     const handleLoadPreset = (data: StoryboardState) => {
         setGenre(data.genre);
         setDuration(data.duration);
-        setMood(data.mood);
-        setTargetAudience(data.targetAudience);
+        setStructure(data.structure || 'viral_hook');
+        setHookStrategy(data.hookStrategy || '');
         setShowPresets(false);
     };
 
-    // Analyze URL Function
-    const handleAnalyzeUrl = async () => {
-        if (!url) return;
-        setIsAnalyzing(true);
-
-        try {
-            const isLocalhost = window.location.hostname === 'localhost';
-            let data;
-            if (isLocalhost && !import.meta.env.VITE_VERCEL_ENV) {
-                await new Promise(r => setTimeout(r, 1500));
-                data = {
-                    success: true,
-                    data: {
-                        title: "Example Scifi Article",
-                        description: "A detailed analysis of cyberpunk trends in 2024.",
-                        keywords: "cyberpunk, neon, 2024, ai trend"
-                    }
-                };
-            } else {
-                const res = await fetch('/api/analyze-url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                data = await res.json();
-            }
-
-            if (data.success) {
-                setRefData({ url, ...data.data });
-            } else {
-                alert('URL 분석 실패: ' + data.error);
-            }
-        } catch (e) {
-            console.error(e);
-            alert('분석 중 오류가 발생했습니다.');
-        } finally {
-            setIsAnalyzing(false);
-        }
-    };
+    // ... (handleAnalyzeUrl) ...
 
     const handleGenerate = () => {
         const prompt = generateStoryboardPrompt(
@@ -100,9 +62,8 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
             topic,
             genre,
             duration,
-            mood,
-            targetAudience,
-            characters,
+            structure,
+            hookStrategy,
             refData,
             'ko'
         );
@@ -238,7 +199,7 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
                     )}
                 </div>
 
-                {/* Advanced Inputs Accordion */}
+                {/* v2.5 Narrative Architect Controls */}
                 <div style={{ border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
                     <button
                         onClick={() => setShowAdvanced(!showAdvanced)}
@@ -249,50 +210,47 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             background: 'rgba(255,255,255,0.03)',
-                            color: 'var(--color-text-muted)',
+                            color: 'var(--color-primary)',
                             cursor: 'pointer'
                         }}
                     >
-                        <span style={{ fontWeight: 600 }}>✨ 디테일 설정 (Mood, Characters...)</span>
+                        <span style={{ fontWeight: 600 }}>📐 구성 및 훅 설계 (Narrative Architecture)</span>
                         {showAdvanced ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                     </button>
 
                     {showAdvanced && (
                         <div style={{ padding: '1.5rem', display: 'grid', gap: '1.5rem', background: 'rgba(0,0,0,0.2)' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>분위기 (Mood)</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>영상 구성 프레임워크 (Structure Framework)</label>
                                 <select
-                                    value={mood}
-                                    onChange={(e) => setMood(e.target.value)}
+                                    value={structure}
+                                    onChange={(e) => setStructure(e.target.value)}
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
                                 >
-                                    <option value="">선택안함 (기본)</option>
-                                    <option value="희망찬 (Hopeful)">희망찬 (Hopeful)</option>
-                                    <option value="긴박한 (Thriller)">긴박한 (Thriller)</option>
-                                    <option value="우울한 (Noir)">우울한 (Noir)</option>
-                                    <option value="몽환적인 (Dreamy)">몽환적인 (Dreamy)</option>
-                                    <option value="유머러스한 (Comedic)">유머러스한 (Comedic)</option>
+                                    <option value="viral_hook">Viral Hook (조회수/Retention 중심)</option>
+                                    <option value="storytelling">Storytelling Arc (몰입/공감 중심)</option>
+                                    <option value="educational">Problem-Solution (정보/설득 중심)</option>
                                 </select>
+                                <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.4rem' }}>
+                                    * <strong>Viral Hook</strong>: 3초 안에 승부를 보는 숏폼/트렌드 영상에 적합<br />
+                                    * <strong>Storytelling</strong>: 브이로그, 드라마틱한 전개<br />
+                                    * <strong>Problem-Solution</strong>: 리뷰, 꿀팁, 강의 영상
+                                </p>
                             </div>
+
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>타겟 오디언스 (Target Audience)</label>
-                                <input
-                                    type="text"
-                                    value={targetAudience}
-                                    onChange={(e) => setTargetAudience(e.target.value)}
-                                    placeholder="예: 20대 직장인, 투자자"
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>오프닝 훅 전략 (Opening Hook Strategy)</label>
+                                <select
+                                    value={hookStrategy}
+                                    onChange={(e) => setHookStrategy(e.target.value)}
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>주요 등장인물 (Key Characters)</label>
-                                <input
-                                    type="text"
-                                    value={characters}
-                                    onChange={(e) => setCharacters(e.target.value)}
-                                    placeholder="예: 30대 남성 형사, 5세 여아"
-                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
-                                />
+                                >
+                                    <option value="">선택 안 함 (기본)</option>
+                                    <option value="Negative Hook">Negative Hook ("이것 모르면 손해")</option>
+                                    <option value="Visual Spectacle">Visual Spectacle (압도적 영상미 시작)</option>
+                                    <option value="Curiosity Gap">Curiosity Gap (결과 먼저 보여주기)</option>
+                                    <option value="Relatable Pain">Relatable Pain ("이런 적 있으시죠?")</option>
+                                </select>
                             </div>
                         </div>
                     )}
