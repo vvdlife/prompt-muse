@@ -141,7 +141,8 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                                 alert('스타일이 적용되고 클립보드에 이미지가 복사되었습니다! (Ctrl+V로 사용 가능)');
                             } catch (clipboardError) {
                                 console.error('Clipboard write failed', clipboardError);
-                                alert('스타일이 적용되었습니다! (클립보드 복사 실패 - 브라우저 권한 확인 필요)');
+                                // Fallback message
+                                alert('이미지 추출 성공! \n\n(브라우저 보안으로 자동 복사가 차단되었습니다. 이미지 위에 있는 "이미지 복사" 버튼을 눌러주세요.)');
                             }
 
                         } catch (e) {
@@ -180,7 +181,7 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                         position: 'relative',
                         overflow: 'hidden'
                     }}>
-                        {thumbImagePreview && (
+                        {thumbImagePreview && thumbImageFile && (
                             <div style={{
                                 position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
                                 background: 'rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column',
@@ -189,16 +190,33 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                                 <div style={{ color: '#fff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                                     이미지 준비됨 (Ready)
                                 </div>
-                                <button
-                                    onClick={() => {
-                                        setThumbImagePreview(null);
-                                        setThumbImageFile(null);
-                                    }}
-                                    className="btn-icon"
-                                    style={{ border: '1px solid #666', color: '#ccc', fontSize: '0.7rem' }}
-                                >
-                                    이미지 제거 (Clear)
-                                </button>
+                                <div className="flex-row gap-xs">
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                const item = new ClipboardItem({ [thumbImageFile.type]: thumbImageFile });
+                                                await navigator.clipboard.write([item]);
+                                                alert('클립보드에 이미지가 복사되었습니다!');
+                                            } catch (e) {
+                                                alert('복사 실패: ' + e);
+                                            }
+                                        }}
+                                        className="btn-icon"
+                                        style={{ background: 'var(--color-primary)', color: 'black', fontWeight: 'bold', fontSize: '0.8rem' }}
+                                    >
+                                        <Copy size={14} /> 이미지 복사
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setThumbImagePreview(null);
+                                            setThumbImageFile(null);
+                                        }}
+                                        className="btn-icon"
+                                        style={{ border: '1px solid #666', color: '#ccc', fontSize: '0.8rem' }}
+                                    >
+                                        제거
+                                    </button>
+                                </div>
                             </div>
                         )}
 
