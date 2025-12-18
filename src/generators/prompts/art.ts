@@ -7,6 +7,7 @@ const wrapForAsset = (input: string, _type: 'image' | 'video'): string => {
 
 export const generateMidjourneyExpertPrompt = (
     description: string,
+    model: string, // v14.0 Selection (e.g. "v7.2")
     // Midjourney Params (now re-purposed for Channel Asset logic internally if needed, or passed from UI)
     ar: string,
     stylize: number,
@@ -55,7 +56,19 @@ export const generateMidjourneyExpertPrompt = (
     // Combine Core + Channel Preset + Details
     const finalPrompt = `${core}, ${styleGuide}, ${details}`;
 
-    const params = `--ar ${ar} --stylize ${stylize} --weird ${weird} --q 2 --v 6.0 --no text, watermark, signature, letters, typography, logo`;
+    // Parse model string to get version tag (Simple heuristic)
+    // "v7.2 (Photorealism)" -> "--v 7.2"
+    // "Niji 7" -> "--nji 7"
+    let versionParam = '--v 6.0'; // Fallback
+    if (model.includes('Niji')) {
+        const nijiVer = model.match(/\d+(\.\d+)?/)?.[0] || '6';
+        versionParam = `--nji ${nijiVer}`;
+    } else {
+        const vVer = model.match(/v(\d+(\.\d+)?)/i)?.[1] || '6.0';
+        versionParam = `--v ${vVer}`;
+    }
+
+    const params = `--ar ${ar} --stylize ${stylize} --weird ${weird} --q 2 ${versionParam} --no text, watermark, signature, letters, typography, logo`;
     const defaultQuality = "8k resolution, highly detailed, unreal engine 5 render";
 
     return `/imagine prompt: ${finalPrompt} ${defaultQuality} ${params}`;

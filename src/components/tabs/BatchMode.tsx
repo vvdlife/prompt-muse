@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Sparkles } from 'lucide-react';
+import { Copy, Check, Sparkles, Settings2 } from 'lucide-react';
 
 // v2.6 Pipeline Integration
 interface BatchModeProps {
@@ -10,6 +10,13 @@ interface BatchModeProps {
 export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopicChange }) => {
     const [topic, setTopic] = useState(initialTopic);
 
+    // v14.0 Fine-grained Batch Controls
+    const [longFormCount, setLongFormCount] = useState(1);
+    const [shortFormCount, setShortFormCount] = useState(3);
+    const [longFormTopics, setLongFormTopics] = useState('');
+    const [shortFormTopics, setShortFormTopics] = useState('');
+    const [showConfig, setShowConfig] = useState(false);
+
     // Sync local topic with parent
     const handleTopicChange = (val: string) => {
         setTopic(val);
@@ -19,41 +26,38 @@ export const BatchMode: React.FC<BatchModeProps> = ({ initialTopic = '', onTopic
     const [copied, setCopied] = useState(false);
 
     const generateWeeklyStrategyPrompt = (topic: string) => {
+        const longTopicsList = longFormTopics.split('\n').filter((t: string) => t.trim()).map((t: string) => `- Specified Topic: ${t}`).join('\n');
+        const shortTopicsList = shortFormTopics.split('\n').filter((t: string) => t.trim()).map((t: string) => `- Specified Topic: ${t}`).join('\n');
+
         return `
 # Weekly Content Strategy: "One-Source Multi-Use" (OSMU) Agent Role
 
 You are a professional Content Strategist & YouTube PD.
-Your goal is to maximize the output of a single topic by creating a coherent schedule of 1 Long-form video (Main) and 3 Short-form videos (Derivatives).
+Your goal is to maximize the output of a single topic by creating a coherent schedule of ${longFormCount} Long-form video(s) and ${shortFormCount} Short-form video(s).
 
 ## Input Topic
 "${topic}"
 
 ## Task
-Create a detailed content plan and script outlines for the following 4 videos:
+Create a detailed content plan and script outlines for the following videos:
 
-### 1. Long-form Video (Main) - "Deep Dive"
+### Part 1. Long-form Videos (${longFormCount} items) - "Deep Dive"
 - **Purpose**: Authority building, deep engagement, high retention.
 - **Format**: 16:9, 8-12 minutes.
 - **Tone**: Professional, informative, analytical.
-- **Output Required**: 
+${longTopicsList ? `\n**Requested Specific Topics**:\n${longTopicsList}\n` : ''}
+**Output Required per Video**:
     - Title Candidates (3 viral hooks)
     - Thumbnail Concept (Visual description)
     - Structure Outline (Intro -> Body Points -> Conclusion)
 
-### 2. Short-form 1 (Derivative) - "The Hook/Highlight"
-- **Purpose**: Extract the most shocking/interesting fact from the Main video to drive traffic.
+### Part 2. Short-form Videos (${shortFormCount} items) - "Viral Derivatives"
+- **Purpose**: Traffic generation, reach extension.
 - **Format**: 9:16, <60s, Fast paced.
-- **Output Required**: 60s Script with visual cues.
-
-### 3. Short-form 2 (derivative) - "The How-To/Tip"
-- **Purpose**: Actionable value. A quick tip related to the topic.
-- **Format**: 9:16, <60s.
-- **Output Required**: Step-by-step Script (Problem -> Solution).
-
-### 4. Short-form 3 (Derivative) - "The Behind-the-Scenes / Controversy"
-- **Purpose**: Engagement, comments, relatable content.
-- **Format**: 9:16, <60s.
-- **Output Required**: Script focusing on a common misconception or "Real Talk".
+${shortTopicsList ? `\n**Requested Specific Topics**:\n${shortTopicsList}\n` : ''}
+**Output Required per Video**:
+    - 60s Script with visual cues.
+    - Hook Strategy (Visual/Audio/Negative).
 
 ## Execution Instruction
 Provide the output in a structured format (Markdown) that I can immediately use to film.
@@ -78,7 +82,7 @@ Provide the output in a structured format (Markdown) that I can immediately use 
                 <Sparkles color="var(--color-secondary)" /> 주간 기획 매니저 (Weekly Batch)
             </h3>
             <p style={{ color: '#aaa', marginBottom: '2rem' }}>
-                하나의 주제로 <strong>롱폼 1개 + 쇼츠 3개</strong>의 기획안을 한 번에 생성합니다. (OSMU 전략)
+                하나의 주제로 <strong>롱폼 {longFormCount}개 + 쇼츠 {shortFormCount}개</strong>의 기획안을 한 번에 생성합니다. (OSMU 전략)
             </p>
 
             <div style={{ display: 'grid', gap: '1.5rem' }}>
@@ -91,6 +95,70 @@ Provide the output in a structured format (Markdown) that I can immediately use 
                         placeholder="예: 아이폰 16 언박싱 및 리뷰"
                         style={{ width: '100%', padding: '1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--color-border)', fontSize: '1.1rem' }}
                     />
+                </div>
+
+                {/* Configuration Toggle */}
+                <div style={{ border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+                    <button
+                        onClick={() => setShowConfig(!showConfig)}
+                        style={{
+                            width: '100%', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            background: 'rgba(255,255,255,0.03)', color: '#ccc', cursor: 'pointer', border: 'none'
+                        }}
+                    >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Settings2 size={16} /> 상세 설정 (수량 및 개별 주제)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#666' }}>{showConfig ? '접기' : '펼치기'}</span>
+                    </button>
+
+                    {showConfig && (
+                        <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.2)', display: 'grid', gap: '1.5rem' }}>
+                            {/* Long Form Config */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem' }}>롱폼 개수</label>
+                                    <input
+                                        type="number" min="0" max="10"
+                                        value={longFormCount}
+                                        onChange={(e) => setLongFormCount(parseInt(e.target.value) || 0)}
+                                        style={{ width: '100%', padding: '0.5rem', background: '#222', border: '1px solid #444', color: 'white', borderRadius: '4px' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem' }}>롱폼 지정 주제 (줄바꿈으로 구분, 선택사항)</label>
+                                    <textarea
+                                        value={longFormTopics}
+                                        onChange={(e) => setLongFormTopics(e.target.value)}
+                                        placeholder="예: 아이폰 16 카메라 테스트&#13;&#10;아이폰 16 vs 15 비교"
+                                        style={{ width: '100%', height: '60px', padding: '0.5rem', background: '#222', border: '1px solid #444', color: 'white', borderRadius: '4px', resize: 'vertical' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ borderTop: '1px solid #333' }} />
+
+                            {/* Short Form Config */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem' }}>쇼츠 개수</label>
+                                    <input
+                                        type="number" min="0" max="20"
+                                        value={shortFormCount}
+                                        onChange={(e) => setShortFormCount(parseInt(e.target.value) || 0)}
+                                        style={{ width: '100%', padding: '0.5rem', background: '#222', border: '1px solid #444', color: 'white', borderRadius: '4px' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem' }}>쇼츠 지정 주제 (줄바꿈으로 구분, 선택사항)</label>
+                                    <textarea
+                                        value={shortFormTopics}
+                                        onChange={(e) => setShortFormTopics(e.target.value)}
+                                        placeholder="예: 카메라 줌 기능 1분 요약&#13;&#10;배터리 타임 테스트 결과"
+                                        style={{ width: '100%', height: '60px', padding: '0.5rem', background: '#222', border: '1px solid #444', color: 'white', borderRadius: '4px', resize: 'vertical' }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <button
@@ -109,7 +177,7 @@ Provide the output in a structured format (Markdown) that I can immediately use 
                         fontSize: '1.1rem'
                     }}
                 >
-                    🚀 주간 콘텐츠 기획안 생성 (1 Long + 3 Shorts)
+                    🚀 주간 콘텐츠 기획안 생성 ({longFormCount} Long + {shortFormCount} Shorts)
                 </button>
 
                 {result && (

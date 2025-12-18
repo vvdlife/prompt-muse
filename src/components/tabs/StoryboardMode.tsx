@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateStoryboardPrompt, type ReferenceData } from '../../generators';
-import { Copy, Check, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Save, Trash2, FolderOpen } from 'lucide-react';
+import { Copy, Check, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Save, Trash2, FolderOpen, Bot, Zap } from 'lucide-react';
 import { usePresets } from '../../hooks/usePresets';
 
 interface StoryboardModeProps {
@@ -23,6 +23,22 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
     const [topic, setTopic] = useState(initialTopic);
     const [genre, setGenre] = useState('');
     const [duration, setDuration] = useState('');
+
+    // v2.6 Platform & Model Selection
+    const [localPlatform, setLocalPlatform] = useState<'chatgpt' | 'gemini'>(platform);
+    const [localModel, setLocalModel] = useState('');
+
+    // Update local platform if prop changes (optional sync)
+    useEffect(() => { setLocalPlatform(platform); }, [platform]);
+
+    // Set default model when platform changes
+    useEffect(() => {
+        if (localPlatform === 'gemini') {
+            setLocalModel('Gemini 3.0 Ultra (2025 Latest)');
+        } else {
+            setLocalModel('GPT-5.2 (Latest)');
+        }
+    }, [localPlatform]);
 
     // v2.5 Narrative Architect (Replaces Advanced v3.0)
     const [structure, setStructure] = useState('viral_hook');
@@ -100,7 +116,8 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
 
     const handleGenerate = () => {
         const prompt = generateStoryboardPrompt(
-            platform,
+            localPlatform,
+            localModel,
             topic,
             genre,
             duration,
@@ -123,8 +140,8 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
     return (
         <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem', position: 'relative' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>
-                    {platform === 'gemini' ? 'Gemini' : 'ChatGPT'} 영상 콘티 작가 모드
+                <h3 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Bot /> 대본 연구소 (Script Lab)
                 </h3>
 
                 {/* Preset Toggle */}
@@ -134,6 +151,63 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
                 >
                     <FolderOpen size={16} /> 프리셋 ({presets.length})
                 </button>
+            </div>
+
+            {/* Platform Selection Bar */}
+            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1rem', marginBottom: '2rem', border: '1px solid var(--color-border)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <button
+                        onClick={() => setLocalPlatform('gemini')}
+                        style={{
+                            padding: '1rem', borderRadius: '8px',
+                            background: localPlatform === 'gemini' ? 'rgba(77, 171, 247, 0.2)' : 'transparent',
+                            border: localPlatform === 'gemini' ? '1px solid #4dabf7' : '1px solid #444',
+                            color: localPlatform === 'gemini' ? '#4dabf7' : '#888',
+                            fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                        }}
+                    >
+                        <Zap size={18} /> Gemini
+                    </button>
+                    <button
+                        onClick={() => setLocalPlatform('chatgpt')}
+                        style={{
+                            padding: '1rem', borderRadius: '8px',
+                            background: localPlatform === 'chatgpt' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                            border: localPlatform === 'chatgpt' ? '1px solid white' : '1px solid #444',
+                            color: localPlatform === 'chatgpt' ? 'white' : '#888',
+                            fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                        }}
+                    >
+                        <Bot size={18} /> ChatGPT
+                    </button>
+                </div>
+
+                {/* Model Selection */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#ccc' }}>사용 모델 (Target Model)</label>
+                    <select
+                        value={localModel}
+                        onChange={(e) => setLocalModel(e.target.value)}
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
+                    >
+                        {localPlatform === 'gemini' ? (
+                            <>
+                                <option value="Gemini 3.0 Ultra (2025 Latest)">Gemini 3.0 Ultra (2025 Latest) - Best for Scripting</option>
+                                <option value="Gemini 3.0 Pro">Gemini 3.0 Pro - Balanced</option>
+                                <option value="Gemini 3.0 Flash (Fastest)">Gemini 3.0 Flash - Fastest</option>
+                                <option value="Gemini 2.0 Flash (Legacy)">Gemini 2.0 Flash (Legacy)</option>
+                            </>
+                        ) : (
+                            <>
+                                <option value="GPT-5.2 (Latest)">GPT-5.2 (Latest) - Superior Creative Writing</option>
+                                <option value="GPT-5.1">GPT-5.1 - Stable</option>
+                                <option value="o2 (Deep Reasoning)">o2 (Deep Reasoning) - Best for Logic/Structure</option>
+                                <option value="GPT-5 (Standard)">GPT-5 (Standard)</option>
+                                <option value="GPT-4o (Legacy)">GPT-4o (Legacy)</option>
+                            </>
+                        )}
+                    </select>
+                </div>
             </div>
 
             {/* Preset Modal/Dropdown */}
@@ -326,13 +400,13 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
                         boxShadow: 'var(--glow-primary)'
                     }}
                 >
-                    {platform === 'gemini' ? 'Gemini' : 'ChatGPT'} 콘티 프롬프트 생성
+                    {localPlatform === 'gemini' ? 'Gemini' : 'ChatGPT'} 콘티 프롬프트 생성 ({localModel})
                 </button>
 
                 {result && (
                     <div style={{ marginTop: '2rem', animation: 'fadeIn 0.5s' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#aaa' }}>
-                            <span>생성된 전문가 프롬프트</span>
+                            <span>생성된 전문가 프롬프트 ({localModel})</span>
                             <button
                                 onClick={handleCopy}
                                 style={{ display: 'flex', gap: '0.5rem', color: copied ? 'var(--color-primary)' : 'white' }}

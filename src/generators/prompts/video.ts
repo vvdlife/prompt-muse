@@ -6,6 +6,7 @@ const wrapForAsset = (input: string, _type: 'image' | 'video'): string => {
 
 export const generateVeoExpertPrompt = (
     description: string,
+    model: string, // v14.0 Model Injection
     shotFunction: string, // v2.5 Copilot: Replaces 'cameraMove'
     resolution: '1080p' | '4k',
     useAudio: boolean,
@@ -51,6 +52,7 @@ export const generateVeoExpertPrompt = (
     }
 
     let prompt = `[Video Prompt - B-Roll Director Mode]
+Target Model: ${model}
 Concept: ${core}
 Visual Context: ${details}
 Camera Strategy: ${technicalCamera} (Intent: ${shotFunction})

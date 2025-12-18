@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateMidjourneyExpertPrompt, generateVeoExpertPrompt, generateGeminiThumbnailPrompt, type ReferenceData } from '../../generators';
 import { YoutubeExtractor } from '../YoutubeExtractor';
-import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Image as ImageIcon, LayoutTemplate } from 'lucide-react';
+import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Image as ImageIcon, LayoutTemplate, ExternalLink, Clapperboard, Palette } from 'lucide-react';
 
 interface AssetModeProps {
     platform: 'midjourney' | 'veo3';
@@ -17,9 +17,24 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
     const [assetType, setAssetType] = useState<'default' | 'thumbnail'>(fixedAssetType || 'default');
     const [description, setDescription] = useState(initialContext || initialTopic || '');
 
-    // Thumbnail Mode State (v6.0)
-    // v2.2 Simplified: Removed Emotion/Composition/TextSpace states as they are now defaults.
+    // v14.0 Platform & Model Selection (Dec 2025)
+    // We use local state to toggle between Video (Veo3) and Art (Midjourney) freely
+    const [localPlatform, setLocalPlatform] = useState<'midjourney' | 'veo3'>(platform);
+    const [localModel, setLocalModel] = useState('');
 
+    // Sync prop platform to local on mount (optional)
+    useEffect(() => { setLocalPlatform(platform); }, [platform]);
+
+    // Set default model based on platform
+    useEffect(() => {
+        if (localPlatform === 'veo3') {
+            setLocalModel('Veo 3 (Cinematic) - Latest');
+        } else {
+            setLocalModel('v7.2 (Photorealism) - Latest');
+        }
+    }, [localPlatform]);
+
+    // Thumbnail Mode State (v6.0)
     const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('gemini'); // Default to Gemini (Fixed)
     const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
     const [thumbImagePreview, setThumbImagePreview] = useState<string | null>(null);
@@ -104,9 +119,14 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
 
     const handleGenerate = () => {
         let prompt = '';
-        if (platform === 'midjourney') {
+        if (localPlatform === 'midjourney') {
             if (assetType === 'thumbnail') {
-                // v2.2 Simplified: Always use Gemini logic with defaults
+                // Should we allow MJ thumbnail generation? 
+                // Current logic separates 'Thumbnail Mode' heavily towards Gemini, but user might want MJ.
+                // For 'Thumbnail Studio', we stick to the existing mixed logic, but primary generation is mostly Gemini text-based or MJ image based.
+                // Wait, if assetType is 'thumbnail', we usually ignore 'localPlatform' unless we want to support MJ thumbnails again.
+                // The current code forces Gemini for thumbnails mostly. Let's keep it simple for now.
+
                 prompt = generateGeminiThumbnailPrompt(
                     description,
                     'excited',      // Default Emotion
@@ -116,12 +136,20 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                     thumbCustomInstruction
                 );
             } else {
-                // v2.5 Channel Consultant: 'lens' state now holds 'channelPreset'
-                prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture, thumbCustomInstruction, refData);
+                // Art Studio Mode
+                prompt = generateMidjourneyExpertPrompt(
+                    description,
+                    localModel, // v14.0
+                    ar, stylize, weird, lighting, lens, color, texture, thumbCustomInstruction, refData
+                );
             }
         } else {
-            // v2.5 B-Roll Director: 'camera' state now holds 'shotFunction'
-            prompt = generateVeoExpertPrompt(description, camera, resolution, useAudio, lighting, lens, thumbCustomInstruction, refData);
+            // Video Studio Mode (Veo3)
+            prompt = generateVeoExpertPrompt(
+                description,
+                localModel, // v14.0
+                camera, resolution, useAudio, lighting, lens, thumbCustomInstruction, refData
+            );
         }
         setResult(prompt);
     };
@@ -132,14 +160,19 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const handleOpenGemini = () => {
+        window.open('https://gemini.google.com/app', '_blank');
+    };
+
     return (
         <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem' }}>
-            <h3 className="text-gradient" style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>
-                {fixedAssetType === 'thumbnail' ? 'Viral Thumbnail Studio' : (platform === 'midjourney' ? 'Midjourney Art Studio' : 'Veo3 Video Studio')}
+            <h3 className="text-gradient" style={{ marginBottom: '1.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {fixedAssetType === 'thumbnail' ? <LayoutTemplate /> : (localPlatform === 'midjourney' ? <Palette /> : <Clapperboard />)}
+                {fixedAssetType === 'thumbnail' ? 'Viral Thumbnail Studio' : (localPlatform === 'midjourney' ? 'Midjourney Art Studio' : 'Veo3 Video Studio')}
             </h3>
 
-            {/* v6.0 Thumbnail Studio Mode Toggle - HIDDEN if fixedAssetType is present (v13.0) */}
-            {platform === 'midjourney' && !fixedAssetType && (
+            {/* v6.0 Thumbnail Studio Mode Toggle - Only if no fixed type is forced */}
+            {!fixedAssetType && (
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: '#222', padding: '0.5rem', borderRadius: '8px' }}>
                     <button
                         onClick={() => setAssetType('default')}
@@ -182,10 +215,68 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                 </div>
             )}
 
+            {/* v14.0 Platform & Model Switcher (Only visible if NOT Thumbnail Mode) */}
+            {fixedAssetType !== 'thumbnail' && (
+                <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1rem', marginBottom: '2rem', border: '1px solid var(--color-border)' }}>
+                    {/* Platform Toggle */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <button
+                            onClick={() => setLocalPlatform('veo3')}
+                            style={{
+                                padding: '1rem', borderRadius: '8px',
+                                background: localPlatform === 'veo3' ? 'rgba(0, 255, 136, 0.2)' : 'transparent',
+                                border: localPlatform === 'veo3' ? '1px solid var(--color-secondary)' : '1px solid #444',
+                                color: localPlatform === 'veo3' ? 'var(--color-secondary)' : '#888',
+                                fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Clapperboard size={18} /> Video (Veo3)
+                        </button>
+                        <button
+                            onClick={() => setLocalPlatform('midjourney')}
+                            style={{
+                                padding: '1rem', borderRadius: '8px',
+                                background: localPlatform === 'midjourney' ? 'rgba(255, 0, 255, 0.2)' : 'transparent',
+                                border: localPlatform === 'midjourney' ? '1px solid var(--color-accent)' : '1px solid #444',
+                                color: localPlatform === 'midjourney' ? 'var(--color-accent)' : '#888',
+                                fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                            }}
+                        >
+                            <Palette size={18} /> Image (Midjourney)
+                        </button>
+                    </div>
+
+                    {/* Model Dropdown */}
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#ccc' }}>사용 모델 (Target Model)</label>
+                        <select
+                            value={localModel}
+                            onChange={(e) => setLocalModel(e.target.value)}
+                            style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
+                        >
+                            {localPlatform === 'veo3' ? (
+                                <>
+                                    <option value="Veo 3 (Cinematic) - Latest">Veo 3 (Cinematic) - 2025 Latest</option>
+                                    <option value="Veo 2 (Standard)">Veo 2 (Standard) - Fast</option>
+                                    <option value="Veo (Legacy)">Veo (Legacy)</option>
+                                </>
+                            ) : (
+                                <>
+                                    <option value="v7.2 (Photorealism) - Latest">Midjourney v7.2 (Photorealism) - 2025 Latest</option>
+                                    <option value="v7.0 (Base)">Midjourney v7.0 (Base)</option>
+                                    <option value="Niji 7 (Anime)">Niji 7 (Anime)</option>
+                                    <option value="v6.1">Midjourney v6.1 (Legacy)</option>
+                                </>
+                            )}
+                        </select>
+                    </div>
+                </div>
+            )}
+
             <div style={{ display: 'grid', gap: '1.5rem' }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>
-                        {assetType === 'thumbnail' ? '영상 주제 (Thumbnail Topic)' : '장면 묘사 (Visual Description)'}
+                        {assetType === 'thumbnail' ? '영상 주제 (Thumbnail Topic)' : (localPlatform === 'veo3' ? '촬영 내용 (Shot Description)' : '이미지 묘사 (Art Description)')}
                         <span style={{ fontSize: '0.8rem', color: 'var(--color-secondary)', marginLeft: '0.5rem' }}>* 한글 입력 시 자동 보정됨</span>
                     </label>
                     <textarea
@@ -215,15 +306,12 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                     <div style={{ padding: '1.5rem', background: 'rgba(255, 0, 255, 0.05)', borderRadius: '8px', border: '1px solid var(--color-accent)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                             <h4 style={{ color: 'var(--color-accent)', fontWeight: 'bold', margin: 0 }}>썸네일 전용 설정 (Viral Formula)</h4>
-
-                            {/* Generator Engine Toggle REMOVED */}
                         </div>
 
                         {/* v14.0 YouTube Thumbnail Extractor Integration */}
                         <YoutubeExtractor
                             onApplyStyle={async (url) => {
                                 try {
-                                    // v14.1 Gemini Bridge: Fetch URL and convert to File
                                     const response = await fetch(url);
                                     const blob = await response.blob();
                                     const file = new File([blob], "youtube_thumbnail.jpg", { type: "image/jpeg" });
@@ -240,27 +328,12 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                             }}
                         />
 
-                        {/* Engine Selection: REMOVED by user request (Gemini Only) */}
-                        {/* 
-                         <div style={{ display: 'flex', ... }}> ... </div>
-                        */}
-
-                        {/* v12.0 Hide manual options if Gemini Image Ref is active */}
-                        {/* v2.2 Simplified UI: Emotion & Composition Controls REMOVED by user request */}
-                        {/* We use 'Custom Instruction' for these details now. */}
-
                         {thumbEngine === 'gemini' && thumbImagePreview && (
                             <div style={{ padding: '1rem', background: 'rgba(77, 171, 247, 0.1)', borderRadius: '8px', border: '1px solid #4dabf7', marginBottom: '1.5rem', textAlign: 'center', color: '#99e9f2' }}>
                                 ✨ <strong>이미지 복제 모드 활성화</strong><br />
                                 <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>감정, 구도 등 상세 설정은 무시되고, 업로드한 이미지 스타일을 전적으로 따릅니다.</span>
                             </div>
                         )}
-
-                        {/* v2.2 Simplified UI: Text Space Toggle REMOVED (Defaulted to True) */}
-
-                        {/* v2.2 Simplified UI: Style Reference URL REMOVED (Gemini Only) */}
-                        {/* {thumbEngine === 'midjourney' && (...)} */}
-
 
                         {thumbEngine === 'gemini' && (
                             <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #444' }}>
@@ -283,55 +356,15 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                     position: 'relative',
                                     overflow: 'hidden'
                                 }}>
-                                    {/* Actions for the selected image */}
                                     {thumbImagePreview && (
                                         <div style={{
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                            width: '100%',
-                                            height: '100%',
-                                            background: 'rgba(0,0,0,0.6)',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            gap: '0.8rem',
-                                            zIndex: 10
+                                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                                            background: 'rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column',
+                                            justifyContent: 'center', alignItems: 'center', gap: '0.8rem', zIndex: 10
                                         }}>
                                             <div style={{ color: '#fff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                                                 이미지 준비됨 (Ready)
                                             </div>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        if (thumbImagePreview) {
-                                                            window.open(thumbImagePreview, '_blank');
-                                                        }
-                                                    }}
-                                                    style={{
-                                                        padding: '0.6rem 1.2rem',
-                                                        borderRadius: '6px',
-                                                        background: 'var(--color-primary)',
-                                                        color: '#000',
-                                                        border: 'none',
-                                                        fontWeight: 'bold',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.5rem',
-                                                        fontSize: '0.9rem',
-                                                        boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
-                                                    }}
-                                                >
-                                                    <ImageIcon size={16} /> 원본 이미지 새 창으로 열기
-                                                </button>
-                                                <span style={{ color: '#aaa', fontSize: '0.8rem' }}>
-                                                    * 새 창에서 우클릭하여 '이미지 복사' 또는 '저장' 하세요.
-                                                </span>
-                                            </div>
-
                                             <button
                                                 onClick={() => {
                                                     setThumbImagePreview(null);
@@ -363,15 +396,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                                 type="file"
                                                 accept="image/*"
                                                 onChange={handleFileUpload}
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: 0,
-                                                    left: 0,
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    opacity: 0,
-                                                    cursor: 'pointer'
-                                                }}
+                                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
                                             />
                                         </>
                                     )}
@@ -380,7 +405,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                         )}
                     </div>
                 ) : (
-                    /* Existing Asset Controls */
+                    /* Existing Asset Controls (Video / Art) */
                     <>
                         {/* v4.0 URL Reference Input */}
                         <div>
@@ -426,10 +451,10 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                         {/* Platform Specific Core Controls */}
                         <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
                             <h4 style={{ marginBottom: '1rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Info size={16} /> 필수 설정 ({platform === 'midjourney' ? 'Basic Params' : 'Cam & Res'})
+                                <Info size={16} /> 필수 설정 ({localPlatform === 'midjourney' ? 'Basic Params' : 'Cam & Res'})
                             </h4>
 
-                            {platform === 'midjourney' ? (
+                            {localPlatform === 'midjourney' ? (
                                 <div style={{ display: 'grid', gap: '1rem' }}>
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>종횡비 (--ar)</label>
@@ -473,7 +498,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>컷의 용도 (Shot Function)</label>
                                         <select
-                                            value={camera} // We reuse 'camera' state to store the Shot Function (Intent)
+                                            value={camera}
                                             onChange={(e) => setCamera(e.target.value)}
                                             style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
                                         >
@@ -529,8 +554,6 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                             <option value="Golden Hour">Golden Hour (황금 시간대)</option>
                                             <option value="Cyberpunk Neon">Cyberpunk Neon (네온)</option>
                                             <option value="Studio Softbox">Studio Softbox (스튜디오)</option>
-                                            <option value="Cinematic Volumetric">Volumetric Fog (빛내림/안개)</option>
-                                            <option value="Dark Noir">Dark Noir (누아르)</option>
                                         </select>
                                     </div>
                                     <div>
@@ -539,11 +562,9 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                             <option value="">기본 (Default)</option>
                                             <option value="Wide Angle">Wide Angle (광각/웅장함)</option>
                                             <option value="Telephoto">Telephoto (망원/인물집중)</option>
-                                            <option value="Macro Lens">Macro (초접사)</option>
-                                            <option value="Fisheye">Fisheye (어안 렌즈)</option>
                                         </select>
                                     </div>
-                                    {platform === 'midjourney' && (
+                                    {localPlatform === 'midjourney' && (
                                         <>
                                             <div>
                                                 <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>색감 (Color Palette)</label>
@@ -551,8 +572,6 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                                     <option value="">기본 (Default)</option>
                                                     <option value="Vibrant High Saturation">Vibrant (강렬함)</option>
                                                     <option value="Black and White">Black & White (흑백)</option>
-                                                    <option value="Pastel Tones">Pastel (파스텔)</option>
-                                                    <option value="Muted Earth Tones">Earth Tones (차분함)</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -561,8 +580,6 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                                     <option value="">기본 (Realism)</option>
                                                     <option value="Oil Painting">Oil Painting (유화)</option>
                                                     <option value="3D Render Pixar Style">3D Render (픽사풍)</option>
-                                                    <option value="Pencil Sketch">Sketch (스케치)</option>
-                                                    <option value="Glitch Art">Glitch Art (글리치)</option>
                                                 </select>
                                             </div>
                                         </>
@@ -585,20 +602,31 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                         boxShadow: assetType === 'thumbnail' ? 'var(--glow-accent)' : 'var(--glow-secondary)'
                     }}
                 >
-                    {platform === 'midjourney' ? (assetType === 'thumbnail' ? '썸네일 프롬프트 생성 (Viral)' : '디테일 프롬프트 생성') : '비디오 프롬프트 생성'}
+                    {localPlatform === 'midjourney' ? (assetType === 'thumbnail' ? '썸네일 프롬프트 생성 (Viral Formula)' : 'Midjourney Image 프롬프트 생성') : 'Veo3 Video 프롬프트 생성'}
                 </button>
 
                 {result && (
                     <div style={{ marginTop: '2rem', animation: 'fadeIn 0.5s' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#aaa' }}>
-                            <span>생성된 전문가 프롬프트</span>
-                            <button
-                                onClick={handleCopy}
-                                style={{ display: 'flex', gap: '0.5rem', color: copied ? (assetType === 'thumbnail' ? 'var(--color-accent)' : 'var(--color-primary)') : 'white' }}
-                            >
-                                {copied ? <Check size={16} /> : <Copy size={16} />}
-                                {copied ? '복사됨!' : '복사하기'}
-                            </button>
+                            <span>생성된 전문가 프롬프트 ({localModel})</span>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                {/* v14.0 Open Gemini Button */}
+                                {assetType === 'thumbnail' && (
+                                    <button
+                                        onClick={handleOpenGemini}
+                                        style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: '#4dabf7', color: 'black', padding: '0 0.8rem', borderRadius: '4px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+                                    >
+                                        <ExternalLink size={14} /> Gemini 열기
+                                    </button>
+                                )}
+                                <button
+                                    onClick={handleCopy}
+                                    style={{ display: 'flex', gap: '0.5rem', color: copied ? (assetType === 'thumbnail' ? 'var(--color-accent)' : 'var(--color-primary)') : 'white' }}
+                                >
+                                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                                    {copied ? '복사됨!' : '복사하기'}
+                                </button>
+                            </div>
                         </div>
                         <div
                             style={{
@@ -609,7 +637,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, 
                                 color: '#e0e0e0',
                                 fontFamily: 'monospace',
                                 lineHeight: '1.6',
-                                borderLeft: platform === 'midjourney'
+                                borderLeft: localPlatform === 'midjourney'
                                     ? (assetType === 'thumbnail' ? '4px solid var(--color-accent)' : '4px solid var(--color-primary)')
                                     : '4px solid var(--color-secondary)',
                                 whiteSpace: 'pre-wrap'

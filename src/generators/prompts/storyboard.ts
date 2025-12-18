@@ -2,6 +2,7 @@ import type { ReferenceData } from '../core';
 
 export const generateStoryboardPrompt = (
   platform: 'chatgpt' | 'gemini',
+  model: string, // v2.6 Model Specificity
   topic: string,
   genre: string,
   duration: string,
@@ -89,6 +90,7 @@ export const generateStoryboardPrompt = (
 
   return `
 # ${platform === 'gemini' ? 'Gemini' : 'ChatGPT'} - Narrative Architect Mode
+**Target Model**: ${model}
 ${role}
 
 ## Mission
