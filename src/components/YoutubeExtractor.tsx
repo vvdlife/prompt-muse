@@ -116,7 +116,33 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
                         />
                     </div>
 
-                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => {
+                                    if (extractedUrl) {
+                                        navigator.clipboard.writeText(extractedUrl);
+                                        alert('썸네일 주소가 복사되었습니다!');
+                                    }
+                                }}
+                                className="btn-icon"
+                                title="이미지 주소 복사"
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                                📋 URL 복사
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (extractedUrl) window.open(extractedUrl, '_blank');
+                                }}
+                                className="btn-icon"
+                                title="새 탭에서 이미지 열기"
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                                🔗 열기
+                            </button>
+                        </div>
+
                         <button
                             onClick={handleApply}
                             style={{
@@ -133,7 +159,7 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
                                 boxShadow: '0 4px 15px rgba(255, 69, 0, 0.3)'
                             }}
                         >
-                            <Check size={18} /> 이 스타일로 만들기 (Apply Style)
+                            <Check size={18} /> 이 스타일로 만들기
                         </button>
                     </div>
                 </div>
