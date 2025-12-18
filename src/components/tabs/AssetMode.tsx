@@ -21,7 +21,6 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
     const [thumbSref, setThumbSref] = useState('');
     const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('gemini'); // Default to Gemini
     const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
-    const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
     const [thumbImagePreview, setThumbImagePreview] = useState<string | null>(null);
     const [thumbCustomInstruction, setThumbCustomInstruction] = useState(''); // v2.1 Custom Instruction
 
