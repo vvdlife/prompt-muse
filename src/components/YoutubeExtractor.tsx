@@ -80,11 +80,23 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
                             alt="Extracted Thumbnail"
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={(e) => {
-                                // Fallback to hqdefault if maxres fails
                                 const target = e.target as HTMLImageElement;
-                                if (videoId && target.src.includes('maxresdefault')) {
-                                    target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                                    setExtractedUrl(target.src); // Update state to reflect fallback
+                                if (!videoId) return;
+
+                                // Fallback Chain: maxres -> sd -> hq
+                                if (target.src.includes('maxresdefault')) {
+                                    // Try Standard Definition (640x480)
+                                    const nextSrc = `https://img.youtube.com/vi/${videoId}/sddefault.jpg`;
+                                    target.src = nextSrc;
+                                    setExtractedUrl(nextSrc);
+                                } else if (target.src.includes('sddefault')) {
+                                    // Try High Quality (480x360) - almost always exists
+                                    const nextSrc = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                                    target.src = nextSrc;
+                                    setExtractedUrl(nextSrc);
+                                } else {
+                                    // Even HQ failed? Just fail gracefully.
+                                    setError('썸네일을 불러올 수 없습니다 (비공개 영상이거나 썸네일 없음).');
                                 }
                             }}
                         />
