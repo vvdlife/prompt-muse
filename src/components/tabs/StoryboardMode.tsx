@@ -109,6 +109,7 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
             'ko'
         );
         setResult(prompt);
+        if (onScriptGenerate) onScriptGenerate(prompt);
     };
 
     const handleCopy = () => {
@@ -325,8 +326,13 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
                             </button>
                         </div>
                         <textarea
-                            readOnly
                             value={result}
+                            onChange={(e) => {
+                                const newVal = e.target.value;
+                                setResult(newVal);
+                                if (onScriptGenerate) onScriptGenerate(newVal);
+                            }}
+                            placeholder="AI가 생성한 프롬프트/스크립트가 여기에 표시됩니다. 자유롭게 수정하세요."
                             style={{
                                 width: '100%',
                                 height: '300px',
@@ -335,7 +341,8 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
                                 background: 'rgba(0,0,0,0.3)',
                                 color: '#e0e0e0',
                                 fontFamily: 'monospace',
-                                lineHeight: '1.5'
+                                lineHeight: '1.5',
+                                border: '1px solid rgba(255,255,255,0.1)'
                             }}
                         />
                     </div>
