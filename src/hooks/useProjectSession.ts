@@ -1,5 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { ProjectData } from '../App';
+
+export interface ProjectData {
+    topic: string;
+    genre: string;
+    duration: string;
+    script: string;
+    mood: string;
+}
 
 const STORAGE_KEY = 'prompt-muse-session-v1';
 const DEBOUNCE_DELAY = 1000; // 1 second

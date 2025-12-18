@@ -13,7 +13,6 @@ interface AssetModeProps {
 }
 
 export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType, initialContext = '', initialTopic = '' }) => {
-    const isVeo = platform === 'veo3';
     // v13.0: If fixedAssetType is provided, force that mode. Else default.
     const [assetType, setAssetType] = useState<'default' | 'thumbnail'>(fixedAssetType || 'default');
     const [description, setDescription] = useState(initialContext || initialTopic || '');

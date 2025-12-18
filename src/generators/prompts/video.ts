@@ -9,7 +9,6 @@ export const generateVeoExpertPrompt = (
     shotFunction: string, // v2.5 Copilot: Replaces 'cameraMove'
     resolution: '1080p' | '4k',
     useAudio: boolean,
-    useAudio: boolean,
     lighting: string = '',
     mood: string = '',
     customInstruction: string = '', // v2.7 User Override

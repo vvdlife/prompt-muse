@@ -1,23 +1,10 @@
-```
 import { useState } from 'react';
 import { Header } from './components/Header';
 import { StoryboardMode } from './components/tabs/StoryboardMode';
 import { AssetMode } from './components/tabs/AssetMode';
 import { BatchMode } from './components/tabs/BatchMode';
-import { Terminal, Video, Image as ImageIcon, Sparkles, Layers, LayoutTemplate, ChevronRight, ChevronLeft, CheckCircle2, Circle } from 'lucide-react';
-import clsx from 'clsx';
-
-import { useProjectSession } from './hooks/useProjectSession';
-import { Download, RefreshCw, Save } from 'lucide-react';
-
-// Global Project Data Interface
-export interface ProjectData {
-  topic: string;
-  genre: string;
-  duration: string;
-  script: string;
-  mood: string;
-}
+import { ChevronRight, ChevronLeft, CheckCircle2, Download, RefreshCw } from 'lucide-react';
+import { useProjectSession, type ProjectData } from './hooks/useProjectSession';
 
 function App() {
   // Step State: 1=Planning, 2=Script, 3=Video, 4=Packaging
@@ -75,7 +62,7 @@ function App() {
 
       {/* Auto-Save Indicator */}
       <div style={{ textAlign: 'center', marginBottom: '1rem', fontSize: '0.8rem', color: '#666', height: '1.2em' }}>
-        {lastSaved ? `✅ 자동 저장됨: ${ lastSaved.toLocaleTimeString() } ` : '...'}
+        {lastSaved ? `✅ 자동 저장됨: ${lastSaved.toLocaleTimeString()} ` : '...'}
       </div>
 
       {/* Step Progress Bar */}
@@ -205,9 +192,9 @@ function App() {
       </div>
 
       <style>{`
-  .fade -in { animation: fadeIn 0.4s ease- out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-`}</style>
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   );
 }
