@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { generateMidjourneyExpertPrompt, type ReferenceData } from '../../generators';
 import { useSettingsFile } from '../../hooks/useSettingsFile';
 import { Copy, Check, Info, ChevronDown, ChevronUp, Link as LinkIcon, Loader2, Palette, Download, Upload, User, Image as ImageIcon } from 'lucide-react';
