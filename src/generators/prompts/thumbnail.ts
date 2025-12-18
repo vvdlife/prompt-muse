@@ -42,34 +42,65 @@ export const generateGeminiThumbnailPrompt = (
     textSpace: boolean,
     hasRefImage: boolean = false
 ): string => {
-    // Gemini (Imagen 3 / NanoBanana) Optimized Prompt
-    // v2.0 Update: FULL support for Text & Image Override.
+    // v2.1 Expert PD Strategy: Step-by-Step Structured Prompting
+    // We break down the instruction into clear, logical phases for the AI.
 
-    let prompt = `Create a high-quality YouTube thumbnail image for a video about "${topic}".\n\n`;
-
-    // v12.0/v2.0 Image Supremacy: Absolute Override
     if (hasRefImage) {
-        prompt += `[Style Reference - PRIMARY]\n`;
-        prompt += `- I have attached a reference image. This is the **ABSOLUTE STYLE GUIDE**.\n`;
-        prompt += `- IGNORE all standard composition rules. MIMIC the attached image's layout, color palette, and font style exactly.\n`;
-        prompt += `- Apply the Attached Image's style to the new topic: "${topic}".\n`;
-        prompt += `- You MAY include bold, readable text (Korean or English) if the reference image uses text. Match the font vibe.\n`;
+        return `
+*** MISSION: HIGH-CTR YOUTUBE THUMBNAIL REMIX ***
 
-        return prompt; // Early return for "Image Supremacy" (Professional Mode)
+[PHASE 1: EXPERT ANALYSIS (DECONSTRUCTION)]
+You are a World-Class YouTube Art Director & Data Analyst.
+I have provided a Reference Image that has a proven "Winning Formula" for high views.
+Analyze this image precisely into the following components:
+1. **Composition**: Where is the subject placed? Where is the text? Is it a close-up or wide shot?
+2. **Color Psychology**: What are the dominant colors? (e.g., High contrast Yellow/Red for urgency?)
+3. **Typography DNA**: Analyze the font weight, stroke, shadow, and color.
+4. **The Hook**: What is the key visual tension?
+
+[PHASE 2: ADAPTIVE REMIXING (THE BRIDGE)]
+Now, you must transplant this "Winning Formula" into a completely new context.
+- **Source Style**: The Reference Image provided.
+- **Target Topic**: "${topic}"
+- **Target Emotion**: "${emotion}"
+
+**INSTRUCTION RULES:**
+- **KEEP (The Skeleton)**: You MUST preserve the exact Layout, Camera Angle, Lighting Style, and Font Design of the reference.
+- **CHANGE (The Skin)**: Replace the actual subject and objects to match the new topic: "${topic}".
+- **TEXT**: If the reference has text, replace it with English or Korean text relevant to "${topic}". Match the font style perfectly.
+
+[PHASE 3: FINAL PRODUCTION GUIDE]
+Generate the final image with these specific directives:
+- **Main Subject**: A central figure or object representing "${topic}", posing with "${emotion}" emotion, placed exactly where the subject is in the reference.
+- **Background**: Relevant to "${topic}" but maintaining the same blur/focus ratio as the reference.
+- **Quality**: 8K Display, Hyper-realistic, Unreal Engine 5 Render, Ray Tracing, Vivid Colors.
+- **Negative Prompts**: Do not simply copy the pixels. Do not make the text messy. Do not deform hands/faces.
+
+[EXECUTE NOW]
+Create the definitive thumbnail for "${topic}" using the reference's DNA.
+`.trim();
     }
 
-    // Standard Mode (No Image, just Text Prompts)
-    prompt += `[Visual Details]\n`;
-    if (emotion) prompt += `- The main subject should express a "${emotion}" emotion.\n`;
-    if (composition) prompt += `- Use a "${composition}" composition style.\n`;
-    if (textSpace) prompt += `- Leave empty negative space on one side for potential text placement.\n`;
+    // Standard Mode (No Reference Image) - Still structured
+    return `
+*** MISSION: BEST-IN-CLASS VIRAL THUMBNAIL ***
 
-    prompt += `\n[Style]\n`;
-    prompt += `- 4K resolution, hyper-realistic, vivid colors, eye-catching viral style.\n`;
+[PHASE 1: VISUAL PLANNING]
+You are designing a thumbnail for the topic: "${topic}".
+- **Core Emotion**: ${emotion || 'Excited and Shocked'}
+- **Composition**: ${composition || 'Rule of Thirds'}
+- **Negative Space**: ${textSpace ? 'Required on the side for text overlay' : 'Balanced'}
 
-    prompt += `\n[Text & Typography]\n`;
-    prompt += `- You MAY include bold, exciting Korean (Hangul) or English text if it enhances the viral appeal.\n`;
-    prompt += `- If inserting text, ensure high contrast and professional typography (e.g., Sans-serif, Impact style).\n`;
+[PHASE 2: SCENE DESCRIPTION]
+1. **Subject**: A high-quality, expressive subject appropriate for "${topic}".
+2. **Action**: Dynamic movement or strong facial expression conveying "${emotion}".
+3. **Lighting**: Professional Studio Lighting, Rim Lighting (Backlight) to separate subject from background.
 
-    return prompt;
+[PHASE 3: STYLE & RENDER]
+- **Style**: Viral YouTube Style (Vivid Saturation, High Contrast, Sharp Details).
+- **Tech Specs**: 8K Resolution, Hyper-realism, Cinema 4D Render style.
+- **Text**: You MAY include bold, short text (English/Korean) if it fits the composition. Use Impact-style bold fonts.
+
+Create this image now.
+`.trim();
 };
