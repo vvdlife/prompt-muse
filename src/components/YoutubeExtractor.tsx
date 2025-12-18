@@ -90,7 +90,7 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
                                 // Fallback: maxres -> hqdefault (Safe bet)
                                 if (target.src.includes('maxresdefault')) {
                                     setRetry(true);
-                                    const nextSrc = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                                    const nextSrc = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
                                     setExtractedUrl(nextSrc);
                                 } else {
                                     setRetry(false);

@@ -15,17 +15,19 @@ export const extractVideoId = (url: string): string | null => {
             return urlObj.pathname.slice(1);
         }
     } catch (e) {
-        // Fallback for non-URL strings if user just pastes ID? (Optional)
-        // For now, assume full URL
         console.error('Invalid URL format', e);
     }
     return null;
 };
 
 export const getThumbnailUrls = (videoId: string) => {
+    // Clean videoId just in case (remove trailing slashes or weird chars)
+    const cleanId = videoId.replace(/[^a-zA-Z0-9_-]/g, '');
+
+    // v2.0: Use i.ytimg.com (Direct CDN) instead of img.youtube.com
     return {
-        maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-        sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
-        hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+        maxres: `https://i.ytimg.com/vi/${cleanId}/maxresdefault.jpg`,
+        sd: `https://i.ytimg.com/vi/${cleanId}/sddefault.jpg`,
+        hq: `https://i.ytimg.com/vi/${cleanId}/hqdefault.jpg`
     };
 };
