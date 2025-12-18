@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import { generateGeminiThumbnailPrompt } from '../../generators';
 import { YoutubeExtractor } from '../YoutubeExtractor';
-import { Copy, Check, LayoutTemplate, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Copy, Check, LayoutTemplate, ExternalLink, Image as ImageIcon, Download, Upload } from 'lucide-react';
+import { useSettingsFile } from '../../hooks/useSettingsFile';
 import '../../App.css';
 
 interface ThumbnailStudioProps {
     initialTopic?: string;
+}
+
+interface ThumbnailSettings {
+    description: string;
+    thumbEngine: 'midjourney' | 'gemini';
+    thumbCustomInstruction: string;
 }
 
 export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic = '' }) => {
@@ -18,6 +25,15 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
 
     const [result, setResult] = useState('');
     const [copied, setCopied] = useState(false);
+
+    // v4.1 Preset System (New)
+    const { exportSettings, importSettings } = useSettingsFile<ThumbnailSettings>({
+        description, thumbEngine, thumbCustomInstruction
+    }, (data) => {
+        if (data.description) setDescription(data.description);
+        if (data.thumbEngine) setThumbEngine(data.thumbEngine);
+        if (data.thumbCustomInstruction) setThumbCustomInstruction(data.thumbCustomInstruction);
+    });
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -55,9 +71,25 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
 
     return (
         <div className="fade-in">
-            <h4 className="flex-row text-accent mb-sm">
-                <LayoutTemplate size={20} /> 썸네일 스튜디오 (Viral Formula)
-            </h4>
+            <div className="flex-between mb-sm">
+                <h4 className="flex-row text-accent mb-0">
+                    <LayoutTemplate size={20} /> 썸네일 스튜디오 (Viral Formula)
+                </h4>
+                {/* Preset Buttons */}
+                <div className="flex-row gap-xs">
+                    <button
+                        onClick={() => exportSettings('thumbnail_studio_config')}
+                        className="btn-icon"
+                        title="설정 파일로 저장"
+                    >
+                        <Download size={18} />
+                    </button>
+                    <label className="btn-icon" title="설정 파일 불러오기" style={{ cursor: 'pointer' }}>
+                        <Upload size={18} />
+                        <input type="file" accept=".json" onChange={importSettings} style={{ display: 'none' }} />
+                    </label>
+                </div>
+            </div>
 
             {/* Input Section */}
             <div className="panel-sub" style={{ borderColor: 'var(--color-accent)' }}>
