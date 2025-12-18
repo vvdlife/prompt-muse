@@ -14,16 +14,8 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
     const [extractedUrl, setExtractedUrl] = useState<string | null>(null);
     const [retry, setRetry] = useState(false);
 
-    // v2.1 Deep Dive Fix: Robust pre-check used to prevent 404s before rendering
-    const checkImageAvailability = (url: string): Promise<boolean> => {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => resolve(true);
-            img.onerror = () => resolve(false);
-            img.src = url;
-        });
-    };
-
+    // v2.2 Server-Side Verification: Call our own API to get the valid URL
+    // This prevents 404 errors from ever appearing in the browser console.
     const handleExtract = async () => {
         setError('');
         setExtractedUrl(null);
@@ -37,28 +29,26 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
         }
 
         setVideoId(id);
-        const thumbs = getThumbnailUrls(id);
 
-        // v2.1: Pre-validate MaxRes -> SD -> HQ
-        // This eliminates the visual "404 broken image" flicker entirely.
-        const candidates = [thumbs.maxres, thumbs.sd, thumbs.hq];
+        try {
+            const res = await fetch(`/api/youtube-thumbnail?videoId=${id}`);
+            const data = await res.json();
 
-        for (const candidate of candidates) {
-            const isAvailable = await checkImageAvailability(candidate);
-            if (isAvailable) {
-                setExtractedUrl(candidate);
-                if (onExtract) onExtract(candidate);
+            if (data.success) {
+                setExtractedUrl(data.url);
+                if (onExtract) onExtract(data.url);
 
-                // If we fell back to lower quality, show the message
-                if (candidate !== thumbs.maxres) {
+                // If fell back to lower quality (not maxresdefault), show notice
+                if (data.quality !== 'maxresdefault') {
                     setRetry(true);
                 }
-                return;
+            } else {
+                setError('썸네일을 찾을 수 없습니다.');
             }
+        } catch (e) {
+            console.error(e);
+            setError('서버 통신 중 오류가 발생했습니다.');
         }
-
-        // If all failed
-        setError('썸네일을 불러올 수 없습니다 (모든 화질 실패).');
     };
 
     const handleApply = () => {
