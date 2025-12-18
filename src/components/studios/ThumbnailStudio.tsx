@@ -134,16 +134,7 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                             setThumbImagePreview(url);
                             setThumbEngine('gemini');
 
-                            // Auto-Copy to Clipboard
-                            try {
-                                const item = new ClipboardItem({ [blob.type]: blob });
-                                await navigator.clipboard.write([item]);
-                                alert('스타일이 적용되고 클립보드에 이미지가 복사되었습니다! (Ctrl+V로 사용 가능)');
-                            } catch (clipboardError) {
-                                console.error('Clipboard write failed', clipboardError);
-                                // Fallback message
-                                alert('이미지 추출 성공! \n\n(브라우저 보안으로 자동 복사가 차단되었습니다. 이미지 위에 있는 "이미지 복사" 버튼을 눌러주세요.)');
-                            }
+                            alert('스타일이 적용되었습니다! (Gemini 이미지 복제 모드)');
 
                         } catch (e) {
                             console.error("Image fetch failed", e);
@@ -167,56 +158,82 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                         <span className="text-xs text-accent ms-2">* 제미나이가 이 스타일을 분석합니다.</span>
                     </label>
 
-                    <div style={{
-                        border: '2px dashed #444',
-                        borderRadius: '8px',
-                        padding: '1.5rem',
-                        textAlign: 'center',
-                        background: thumbImagePreview ? `url(${thumbImagePreview}) center/cover` : 'rgba(0,0,0,0.2)',
-                        height: '150px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}>
+                    <div
+                        onClick={() => {
+                            if (thumbImagePreview) {
+                                window.open(thumbImagePreview, '_blank');
+                            }
+                        }}
+                        style={{
+                            border: '2px dashed #444',
+                            borderRadius: '8px',
+                            padding: '1.5rem',
+                            textAlign: 'center',
+                            background: thumbImagePreview ? `url(${thumbImagePreview}) center/cover` : 'rgba(0,0,0,0.2)',
+                            height: '150px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            cursor: thumbImagePreview ? 'pointer' : 'default'
+                        }}
+                        title={thumbImagePreview ? "클릭하여 원본 이미지 열기 (New Tab)" : ""}
+                    >
                         {thumbImagePreview && thumbImageFile && (
                             <div style={{
                                 position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                                background: 'rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column',
-                                justifyContent: 'center', alignItems: 'center', gap: '0.8rem', zIndex: 10
+                                background: 'rgba(0,0,0,0.3)', // Lighter overlay
+                                display: 'flex', flexDirection: 'column',
+                                justifyContent: 'center', alignItems: 'center', gap: '0.8rem', zIndex: 10,
+                                transition: 'opacity 0.2s',
+                                opacity: 0, // Hidden by default, shown on hover (handled by CSS or just keep simple)
+                            }}
+                                className="overlay-hover" // We can add a class or just keep it simple
+                            >
+                                {/* We'll keep it simple: Show always or on hover? 
+                                    User wants to click. Let's make it clear it's clickable.
+                                    Actually, let's keep the text minimal.
+                                */}
+                            </div>
+                        )}
+
+                        {thumbImagePreview && (
+                            <div style={{
+                                position: 'absolute', top: 10, right: 10, zIndex: 20
                             }}>
-                                <div style={{ color: '#fff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-                                    이미지 준비됨 (Ready)
-                                </div>
-                                <div className="flex-row gap-xs">
-                                    <button
-                                        onClick={async () => {
-                                            try {
-                                                const item = new ClipboardItem({ [thumbImageFile.type]: thumbImageFile });
-                                                await navigator.clipboard.write([item]);
-                                                alert('클립보드에 이미지가 복사되었습니다!');
-                                            } catch (e) {
-                                                alert('복사 실패: ' + e);
-                                            }
-                                        }}
-                                        className="btn-icon"
-                                        style={{ background: 'var(--color-primary)', color: 'black', fontWeight: 'bold', fontSize: '0.8rem' }}
-                                    >
-                                        <Copy size={14} /> 이미지 복사
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setThumbImagePreview(null);
-                                            setThumbImageFile(null);
-                                        }}
-                                        className="btn-icon"
-                                        style={{ border: '1px solid #666', color: '#ccc', fontSize: '0.8rem' }}
-                                    >
-                                        제거
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setThumbImagePreview(null);
+                                        setThumbImageFile(null);
+                                    }}
+                                    className="btn-icon"
+                                    style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid #666', color: '#fff', fontSize: '0.7rem', padding: '4px 8px' }}
+                                >
+                                    ✕ 제거
+                                </button>
+                            </div>
+                        )}
+
+                        {thumbImagePreview && (
+                            <div style={{
+                                position: 'absolute', bottom: 10, left: 0, width: '100%',
+                                pointerEvents: 'none' // Let clicks pass through to container
+                            }}>
+                                <span style={{
+                                    background: 'rgba(0,0,0,0.7)',
+                                    padding: '4px 12px',
+                                    borderRadius: '20px',
+                                    color: 'white',
+                                    fontSize: '0.8rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}>
+                                    <ExternalLink size={12} /> 클릭하여 크게 보기
+                                </span>
                             </div>
                         )}
 
