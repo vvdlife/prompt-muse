@@ -12,11 +12,13 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
     const [videoId, setVideoId] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [extractedUrl, setExtractedUrl] = useState<string | null>(null);
+    const [retry, setRetry] = useState(false);
 
     const handleExtract = () => {
         setError('');
         setExtractedUrl(null);
         setVideoId(null);
+        setRetry(false);
 
         const id = extractVideoId(url);
         if (!id) {
@@ -70,10 +72,11 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
                 </button>
             </div>
 
-            {error && <div style={{ color: '#ff6b6b', fontSize: '0.9rem' }}>{error}</div>}
+            {error && <div style={{ color: '#ff6b6b', fontSize: '0.9rem', marginTop: '0.5rem' }}>⚠️ {error}</div>}
+            {retry && !error && <div style={{ color: '#ffad33', fontSize: '0.9rem', marginTop: '0.5rem' }}>⚡ 고화질 썸네일이 없어 표준 화질로 전환합니다...</div>}
 
             {extractedUrl && (
-                <div style={{ animation: 'fadeIn 0.5s' }}>
+                <div style={{ animation: 'fadeIn 0.5s', marginTop: '1rem' }}>
                     <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid #444', aspectRatio: '16/9', background: '#000' }}>
                         <img
                             key={extractedUrl} // Force re-mount on URL change to reset error state
@@ -86,10 +89,12 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
 
                                 // Fallback: maxres -> hqdefault (Safe bet)
                                 if (target.src.includes('maxresdefault')) {
+                                    setRetry(true);
                                     const nextSrc = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                                     setExtractedUrl(nextSrc);
                                 } else {
-                                    setError('썸네일을 불러올 수 없습니다 (썸네일 없음).');
+                                    setRetry(false);
+                                    setError('썸네일을 불러올 수 없습니다.');
                                 }
                             }}
                         />
