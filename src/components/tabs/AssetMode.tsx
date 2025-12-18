@@ -16,7 +16,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
     // Thumbnail Mode State (v6.0)
     // v2.2 Simplified: Removed Emotion/Composition/TextSpace states as they are now defaults.
 
-    // const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('gemini'); // Default to Gemini (Fixed)
+    const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('gemini'); // Default to Gemini (Fixed)
     const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
     const [thumbImagePreview, setThumbImagePreview] = useState<string | null>(null);
     const [thumbCustomInstruction, setThumbCustomInstruction] = useState(''); // v2.1 Custom Instruction
@@ -26,15 +26,77 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
     const [stylize, setStylize] = useState(250);
     const [weird, setWeird] = useState(0);
 
-    // ... (Veo3 States skipped) ...
+    // Veo3 States
+    const [camera, setCamera] = useState('Cinematic drone shot');
+    const [resolution, setResolution] = useState<'1080p' | '4k'>('4k');
+    const [useAudio, setUseAudio] = useState(true);
 
-    // ... (Advanced States skipped) ...
+    // Advanced (v3.0)
+    const [lighting, setLighting] = useState('');
+    const [lens, setLens] = useState('');
+    const [color, setColor] = useState('');
+    const [texture, setTexture] = useState('');
+    const [showAdvanced, setShowAdvanced] = useState(false);
 
-    // ... (URL Grounding skipped) ...
+    // URL Grounding (v4.0)
+    const [url, setUrl] = useState('');
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [refData, setRefData] = useState<ReferenceData | null>(null);
 
-    // ... (handleAnalyzeUrl skipped) ...
+    const [result, setResult] = useState('');
+    const [copied, setCopied] = useState(false);
 
-    // ... (handleFileUpload skipped) ...
+    // Analyze URL Function
+    const handleAnalyzeUrl = async () => {
+        if (!url) return;
+        setIsAnalyzing(true);
+
+        try {
+            const isLocalhost = window.location.hostname === 'localhost';
+            let data;
+            if (isLocalhost && !import.meta.env.VITE_VERCEL_ENV) {
+                await new Promise(r => setTimeout(r, 1500));
+                data = {
+                    success: true,
+                    data: {
+                        title: "Example ArtStation Portfolio",
+                        description: "Dark fantasy concept art style guide.",
+                        keywords: "dark fantasy, oil painting, heavy texture, gothic"
+                    }
+                };
+            } else {
+                const res = await fetch('/api/analyze-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                data = await res.json();
+            }
+
+            if (data.success) {
+                setRefData({ url, ...data.data });
+            } else {
+                alert('URL 분석 실패: ' + data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('분석 중 오류가 발생했습니다.');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setThumbImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setThumbImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleGenerate = () => {
         let prompt = '';
