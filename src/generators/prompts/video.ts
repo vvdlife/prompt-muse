@@ -6,13 +6,33 @@ const wrapForAsset = (input: string, _type: 'image' | 'video'): string => {
 
 export const generateVeoExpertPrompt = (
     description: string,
-    cameraMove: string,
+    shotFunction: string, // v2.5 Copilot: Replaces 'cameraMove'
     resolution: '1080p' | '4k',
     useAudio: boolean,
     lighting: string = '',
     mood: string = '',
     refData: ReferenceData | null = null
 ): string => {
+    // v2.5 EXPERT PD MODE: B-ROLL DIRECTOR
+    // Map "Director's Intent" (Shot Function) to "Technical Camera Movements"
+    let technicalCamera = '';
+    switch (shotFunction) {
+        case 'Establishing Shot':
+            technicalCamera = 'Wide angle, slow pan, high angle drone shot, establishing the environment';
+            break;
+        case 'Detail Texture':
+            technicalCamera = 'Macro lens, extreme close-up, shallow depth of field, slow rack focus';
+            break;
+        case 'Reaction/Emotion':
+            technicalCamera = 'Medium close-up, handheld camera movement, focus on facial expression';
+            break;
+        case 'Action/Transition':
+            technicalCamera = 'Fast tracking shot, motion blur, dynamic whip pan';
+            break;
+        default:
+            technicalCamera = 'Cinematic smooth motion, 24fps';
+    }
+
     const core = wrapForAsset(description, 'video');
 
     let details = '';
@@ -24,16 +44,16 @@ export const generateVeoExpertPrompt = (
         details += `Referencing style from: ${refData.title} -- ${refData.description}, `;
     }
 
-    let prompt = `[Video Prompt]
+    let prompt = `[Video Prompt - B-Roll Director Mode]
 Concept: ${core}
-Style/Details: ${details}
-Camera Movement: ${cameraMove}
-Quality: ${resolution}, fluid motion, high temporal coherence, professional color grading.
+Visual Context: ${details}
+Camera Strategy: ${technicalCamera} (Intent: ${shotFunction})
+Quality: ${resolution}, fluid motion, high temporal coherence, professional color grading, cinematic lighting.
 Constraint: Do NOT display any text, subtitles, captions, or typography. Keep the visual feed clean.`;
 
     if (useAudio) {
         prompt += `\n\n[Audio Prompt]
-Soundscape: High fidelity ambient sound, matching the ${mood || 'scene'} mood.`;
+Soundscape: High fidelity ambient sound, matching the ${mood || 'scene'} mood (No speech/dialogue).`;
     }
 
     return prompt;

@@ -27,7 +27,7 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
     const [weird, setWeird] = useState(0);
 
     // Veo3 States
-    const [camera, setCamera] = useState('Cinematic drone shot');
+    const [camera, setCamera] = useState('Establishing Shot'); // v2.5: Stores 'Shot Function' now
     const [resolution, setResolution] = useState<'1080p' | '4k'>('4k');
     const [useAudio, setUseAudio] = useState(true);
 
@@ -112,9 +112,11 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
                     thumbCustomInstruction
                 );
             } else {
+                // v2.5 Channel Consultant: 'lens' state now holds 'channelPreset'
                 prompt = generateMidjourneyExpertPrompt(description, ar, stylize, weird, lighting, lens, color, texture, refData);
             }
         } else {
+            // v2.5 B-Roll Director: 'camera' state now holds 'shotFunction'
             prompt = generateVeoExpertPrompt(description, camera, resolution, useAudio, lighting, lens, refData);
         }
         setResult(prompt);
@@ -465,18 +467,16 @@ export const AssetMode: React.FC<AssetModeProps> = ({ platform, fixedAssetType }
                                 // Veo3 Core Controls
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>카메라 무브먼트</label>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>컷의 용도 (Shot Function)</label>
                                         <select
-                                            value={camera}
+                                            value={camera} // We reuse 'camera' state to store the Shot Function (Intent)
                                             onChange={(e) => setCamera(e.target.value)}
                                             style={{ width: '100%', padding: '0.8rem', borderRadius: '6px', background: '#222', color: 'white', border: '1px solid #444' }}
                                         >
-                                            <option value="Cinematic drone shot">Cinematic Drone Shot (드론)</option>
-                                            <option value="FPV fast motion">FPV Fast Motion (빠른 속도감)</option>
-                                            <option value="Steadycam follow">Steadycam Follow (인물 추적)</option>
-                                            <option value="Slow pan right">Slow Pan Right (천천히 패닝)</option>
-                                            <option value="Rack focus">Rack Focus (초점 이동)</option>
-                                            <option value="Handheld shaking">Handheld Shaking (핸드헬드)</option>
+                                            <option value="Establishing Shot">전경/배경 (Establishing Shot)</option>
+                                            <option value="Detail Texture">감성/디테일 (Detail Texture)</option>
+                                            <option value="Reaction/Emotion">인물 리액션 (Reaction/Emotion)</option>
+                                            <option value="Action/Transition">빠른 전환/액션 (Action/Transition)</option>
                                         </select>
                                     </div>
 

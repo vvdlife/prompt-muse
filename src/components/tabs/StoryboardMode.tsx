@@ -54,7 +54,45 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform }) => {
         setShowPresets(false);
     };
 
-    // ... (handleAnalyzeUrl) ...
+    // Analyze URL Function
+    const handleAnalyzeUrl = async () => {
+        if (!url) return;
+        setIsAnalyzing(true);
+
+        try {
+            const isLocalhost = window.location.hostname === 'localhost';
+            let data;
+            if (isLocalhost && !import.meta.env.VITE_VERCEL_ENV) {
+                await new Promise(r => setTimeout(r, 1500));
+                data = {
+                    success: true,
+                    data: {
+                        title: "Example Scifi Article",
+                        description: "A detailed analysis of cyberpunk trends in 2024.",
+                        keywords: "cyberpunk, neon, 2024, ai trend"
+                    }
+                };
+            } else {
+                const res = await fetch('/api/analyze-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                data = await res.json();
+            }
+
+            if (data.success) {
+                setRefData({ url, ...data.data });
+            } else {
+                alert('URL 분석 실패: ' + data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('분석 중 오류가 발생했습니다.');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
 
     const handleGenerate = () => {
         const prompt = generateStoryboardPrompt(
