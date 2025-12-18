@@ -1,18 +1,14 @@
+```
 import { useState } from 'react';
 import { Header } from './components/Header';
 import { StoryboardMode } from './components/tabs/StoryboardMode';
 import { AssetMode } from './components/tabs/AssetMode';
 import { BatchMode } from './components/tabs/BatchMode';
-import { Terminal, Video, Image as ImageIcon, Sparkles, Layers, LayoutTemplate } from 'lucide-react';
+import { Terminal, Video, Image as ImageIcon, Sparkles, Layers, LayoutTemplate, ChevronRight, ChevronLeft, CheckCircle2, Circle } from 'lucide-react';
 import clsx from 'clsx';
 
-import { useState } from 'react';
-import { Header } from './components/Header';
-import { StoryboardMode } from './components/tabs/StoryboardMode';
-import { AssetMode } from './components/tabs/AssetMode';
-import { BatchMode } from './components/tabs/BatchMode';
-import { ChevronRight, ChevronLeft, CheckCircle2, Circle } from 'lucide-react';
-import clsx from 'clsx';
+import { useProjectSession } from './hooks/useProjectSession';
+import { Download, RefreshCw, Save } from 'lucide-react';
 
 // Global Project Data Interface
 export interface ProjectData {
@@ -27,8 +23,8 @@ function App() {
   // Step State: 1=Planning, 2=Script, 3=Video, 4=Packaging
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Global Project State
-  const [projectData, setProjectData] = useState<ProjectData>({
+  // v3.0 Global Project State with Auto-Save
+  const { projectData, setProjectData, clearSession, exportSession, lastSaved } = useProjectSession({
     topic: '',
     genre: '',
     duration: '',
@@ -58,6 +54,29 @@ function App() {
   return (
     <div className="container" style={{ paddingBottom: '6rem' }}>
       <Header />
+
+      {/* Session Controls (Top Right) */}
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 50 }}>
+        <button
+          onClick={clearSession}
+          style={{ padding: '0.5rem', background: '#333', border: '1px solid #555', color: '#aaa', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem' }}
+          title="초기화 (Reset)"
+        >
+          <RefreshCw size={14} /> 초기화
+        </button>
+        <button
+          onClick={exportSession}
+          style={{ padding: '0.5rem 1rem', background: '#222', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', fontWeight: 'bold' }}
+          title="프로젝트 내보내기 (Export)"
+        >
+          <Download size={14} /> 프로젝트 저장 (.json)
+        </button>
+      </div>
+
+      {/* Auto-Save Indicator */}
+      <div style={{ textAlign: 'center', marginBottom: '1rem', fontSize: '0.8rem', color: '#666', height: '1.2em' }}>
+        {lastSaved ? `✅ 자동 저장됨: ${ lastSaved.toLocaleTimeString() } ` : '...'}
+      </div>
 
       {/* Step Progress Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem', position: 'relative', maxWidth: '800px', margin: '0 auto 3rem' }}>
@@ -186,9 +205,9 @@ function App() {
       </div>
 
       <style>{`
-        .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
+  .fade -in { animation: fadeIn 0.4s ease- out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+`}</style>
     </div>
   );
 }

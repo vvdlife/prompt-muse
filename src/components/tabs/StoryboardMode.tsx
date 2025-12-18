@@ -298,7 +298,6 @@ export const StoryboardMode: React.FC<StoryboardModeProps> = ({ platform, initia
                             </div>
                         </div>
                     )}
-                    )}
                 </div>
 
                 {/* v2.7 Custom User Instruction */}
