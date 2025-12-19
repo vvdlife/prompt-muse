@@ -18,10 +18,15 @@ export const EMOTION_OPTIONS = [
     { label: '🆚 Dilemma (이거 살까 저거 살까/고민)', value: 'Serious Decision Making' },
 
     // 🏠 Vlog & Lifestyle (The Channel's Core Vibe)
-    { label: '🥰 Cozy Home (아늑한 집/편안함)', value: 'Warm and Cozy Atmosphere' },
-    { label: '🥹 Heartwarming (감동/뭉클한 순간)', value: 'Emotional and Touching' },
-    { label: '🌿 Healing (힐링/여유로움)', value: 'Peaceful Healing Vibe' },
-    { label: '✨ Welcoming (손님 맞이/설렘)', value: 'Welcoming and Hospitable' },
+    { label: '🔥 Warm (따뜻한/온기)', value: 'Warm and Hearty Atmosphere' },
+    { label: '🥰 Cozy (아늑한/포근함)', value: 'Cozy and Snug' },
+    { label: '🕯️ Atmospheric (분위기 있는/감성)', value: 'Atmospheric and Moody' },
+    { label: '🥹 Touching (뭉클한/감동)', value: 'Touching Moment' },
+    { label: '🌿 Healing (힐링되는/여유)', value: 'Healing and Relaxing' },
+    { label: '🍃 Natural (자연스러운/꾸안꾸)', value: 'Natural and Candid' },
+    { label: '☁️ Soft (부드러운/소프트)', value: 'Soft and Mellow' },
+    { label: '✨ Stylish (멋스러운/시크)', value: 'Stylish and Chic' },
+    { label: '💖 Welcoming (손님 맞이/설렘)', value: 'Welcoming and Hospitable' },
     { label: '👨‍👩‍👦 Family Bond (가족애/따뜻한 시선)', value: 'Loving Family Bond' }
 ];
 
@@ -43,6 +48,12 @@ export const COMPOSITION_OPTIONS = [
     { label: '📦 Unboxing (박스 개봉/내용물 확인)', value: 'Top-down Unboxing View' },
 
     // 📹 Vlog & Cinematic Styles
+    { label: '🔍 Insert View (인서트 뷰/디테일 강조)', value: 'Detailed Insert Shot' },
+    { label: '👩‍🍳 Cooking Studio (요리 스튜디오 뷰/전문적)', value: 'Cooking Studio Wide Shot' },
+    { label: '🍚 Home Dining (집 밥상 뷰/온더테이블)', value: 'Home Dining Table View' },
+    { label: '🏝️ Island Table (아일랜드 식탁 뷰/키친)', value: 'Kitchen Island Perspective' },
+    { label: '🛸 Aerial View (항공 뷰/전체 조망)', value: 'Top-down Aerial View' },
+
     { label: '📹 Candid Moment (몰래 찍은 듯한/자연스러움)', value: 'Candid Documentary Style' },
     { label: '👥 Over the Shoulder (대화/마주 앉은 시선)', value: 'Over the Shoulder Conversation' },
     { label: '☀️ Sun-kissed (자연광/창가 감성)', value: 'Backlit with Natural Sunlight' },
