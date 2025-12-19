@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { generateGeminiThumbnailPrompt } from '../../generators';
 import { YoutubeExtractor } from '../YoutubeExtractor';
-import { Copy, Check, LayoutTemplate, ExternalLink, Image as ImageIcon, Download, Upload } from 'lucide-react';
+import { Copy, Check, LayoutTemplate, ExternalLink, Image as ImageIcon, Download, Upload, Smartphone, Monitor } from 'lucide-react';
 import { useSettingsFile } from '../../hooks/useSettingsFile';
+import { EMOTION_OPTIONS, COMPOSITION_OPTIONS } from '../../constants/thumbnailOptions';
 import '../../App.css';
 
 interface ThumbnailStudioProps {
@@ -21,9 +22,10 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
     const [thumbEngine, setThumbEngine] = useState<'midjourney' | 'gemini'>('gemini'); // Default to Gemini
 
     // v4.2 Customization State
-    const [emotion, setEmotion] = useState('Excited');
-    const [composition, setComposition] = useState('Dynamic');
+    const [emotion, setEmotion] = useState('Ecstatic Taste Reaction');
+    const [composition, setComposition] = useState('Macro Shot of Food Pickup');
     const [textSpace, setTextSpace] = useState(true);
+    const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9');
 
     const [thumbImageFile, setThumbImageFile] = useState<File | null>(null);
     const [thumbImagePreview, setThumbImagePreview] = useState<string | null>(null);
@@ -60,7 +62,8 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
             composition,
             textSpace,
             !!thumbImageFile,
-            thumbCustomInstruction
+            thumbCustomInstruction,
+            aspectRatio
         );
         setResult(prompt);
     };
@@ -100,6 +103,38 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
             {/* Input Section */}
             <div className="panel-sub" style={{ borderColor: 'var(--color-accent)' }}>
 
+                {/* Aspect Ratio Toggle */}
+                <div className="mb-md flex-row gap-md p-sm" style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '8px', justifyContent: 'center' }}>
+                    <button
+                        onClick={() => setAspectRatio('16:9')}
+                        className={`btn-toggle ${aspectRatio === '16:9' ? 'active' : ''}`}
+                        style={{
+                            flex: 1,
+                            background: aspectRatio === '16:9' ? 'var(--color-accent)' : 'transparent',
+                            color: aspectRatio === '16:9' ? 'white' : '#888',
+                            border: '1px solid #444',
+                            fontWeight: 'bold',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                        }}
+                    >
+                        <Monitor size={18} /> Long-form (16:9)
+                    </button>
+                    <button
+                        onClick={() => setAspectRatio('9:16')}
+                        className={`btn-toggle ${aspectRatio === '9:16' ? 'active' : ''}`}
+                        style={{
+                            flex: 1,
+                            background: aspectRatio === '9:16' ? '#ff4500' : 'transparent', // Orange for Shorts
+                            color: aspectRatio === '9:16' ? 'white' : '#888',
+                            border: '1px solid #444',
+                            fontWeight: 'bold',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                        }}
+                    >
+                        <Smartphone size={18} /> Shorts (9:16)
+                    </button>
+                </div>
+
                 {/* Topic Input */}
                 <div className="mb-md">
                     <label className="label-text">
@@ -125,14 +160,11 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                             value={emotion}
                             onChange={(e) => setEmotion(e.target.value)}
                         >
-                            <option value="Excited">🤩 Excited (신난/흥분된)</option>
-                            <option value="Shocked">😱 Shocked (충격적인)</option>
-                            <option value="Curious">🤔 Curious (궁금한/의문)</option>
-                            <option value="Angry">😡 Angry (화난/비판적)</option>
-                            <option value="Happy">😊 Happy (행복한/긍정적)</option>
-                            <option value="Sad">😢 Sad (슬픈/감성적)</option>
-                            <option value="Professional">👔 Professional (전문적인)</option>
-                            <option value="Dark">🌑 Dark (어두운/진지한)</option>
+                            {EMOTION_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div>
@@ -144,13 +176,11 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
                             value={composition}
                             onChange={(e) => setComposition(e.target.value)}
                         >
-                            <option value="Dynamic">⚡ Dynamic (역동적)</option>
-                            <option value="Rule of Thirds">📐 Rule of Thirds (3분할)</option>
-                            <option value="Center">🎯 Center (중앙 집중)</option>
-                            <option value="Close-up">🔍 Close-up (클로즈업)</option>
-                            <option value="Wide Shot">🏞️ Wide Shot (와이드 샷)</option>
-                            <option value="Diagonal">📉 Diagonal (대각선 구도)</option>
-                            <option value="Symmetry">⚖️ Symmetry (대칭)</option>
+                            {COMPOSITION_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -183,17 +213,43 @@ export const ThumbnailStudio: React.FC<ThumbnailStudioProps> = ({ initialTopic =
 
                 {/* YouTube Extractor Integration */}
                 <YoutubeExtractor
+                    aspectRatio={aspectRatio}
                     onApplyStyle={async (url) => {
                         try {
-                            const response = await fetch(url);
+                            const response = await fetch(url); // Fetch allows Cross-Origin if proxy/CORS is handled.
+                            // If direct fetch fails due to CORS, we might need a proxy, but assuming current implementation works.
                             const blob = await response.blob();
-                            const file = new File([blob], "youtube_thumbnail.jpg", { type: "image/jpeg" });
+                            let file = new File([blob], "youtube_thumbnail.jpg", { type: "image/jpeg" });
+
+                            // Shorts Crop Logic
+                            if (aspectRatio === '9:16') {
+                                const img = new Image();
+                                img.src = URL.createObjectURL(blob);
+                                await new Promise((resolve) => { img.onload = resolve; });
+
+                                const canvas = document.createElement('canvas');
+                                // Target: 9:16. Assume Height governs (cropping width)
+                                const h = img.naturalHeight;
+                                const w = h * (9 / 16);
+                                const x = (img.naturalWidth - w) / 2;
+
+                                canvas.width = w;
+                                canvas.height = h;
+                                const ctx = canvas.getContext('2d');
+                                if (ctx) {
+                                    ctx.drawImage(img, x, 0, w, h, 0, 0, w, h);
+                                    const croppedBlob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+                                    if (croppedBlob) {
+                                        file = new File([croppedBlob], "shorts_crop.jpg", { type: "image/jpeg" });
+                                    }
+                                }
+                            }
 
                             setThumbImageFile(file);
-                            setThumbImagePreview(url);
+                            setThumbImagePreview(URL.createObjectURL(file)); // Show the potentially cropped file
                             setThumbEngine('gemini');
 
-                            alert('스타일이 적용되었습니다! (Gemini 이미지 복제 모드)');
+                            alert('스타일이 적용되었습니다! (Gemini 이미지 복제 모드)\n' + (aspectRatio === '9:16' ? '(Shorts 비율로 자동 크롭됨)' : ''));
 
                         } catch (e) {
                             console.error("Image fetch failed", e);

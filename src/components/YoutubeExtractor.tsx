@@ -5,9 +5,10 @@ import { Search, Check } from 'lucide-react';
 interface YoutubeExtractorProps {
     onExtract?: (url: string) => void;
     onApplyStyle?: (url: string) => void;
+    aspectRatio?: '16:9' | '9:16';
 }
 
-export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, onApplyStyle }) => {
+export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, onApplyStyle, aspectRatio = '16:9' }) => {
     const [url, setUrl] = useState('');
     const [videoId, setVideoId] = useState<string | null>(null);
     const [error, setError] = useState('');
@@ -93,7 +94,16 @@ export const YoutubeExtractor: React.FC<YoutubeExtractorProps> = ({ onExtract, o
 
             {extractedUrl && (
                 <div style={{ animation: 'fadeIn 0.5s', marginTop: '1rem' }}>
-                    <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid #444', aspectRatio: '16/9', background: '#000' }}>
+                    <div style={{
+                        position: 'relative',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        border: '1px solid #444',
+                        aspectRatio: aspectRatio === '16:9' ? '16/9' : '9/16', // Dynamic Aspect Ratio
+                        background: '#000',
+                        maxWidth: aspectRatio === '9:16' ? '240px' : '100%', // Limit width for vertical
+                        margin: aspectRatio === '9:16' ? '0 auto' : '0'
+                    }}>
                         <img
                             key={extractedUrl} // Force re-mount on URL change to reset error state
                             src={extractedUrl}

@@ -41,16 +41,19 @@ export const generateGeminiThumbnailPrompt = (
     composition: string,
     textSpace: boolean,
     hasRefImage: boolean = false,
-    customInstruction: string = ''
+    customInstruction: string = '',
+    aspectRatio: '16:9' | '9:16' = '16:9'
 ): string => {
     // v2.1 Expert PD Strategy: Step-by-Step Structured Prompting
     // We break down the instruction into clear, logical phases for the AI.
 
     let prompt = '';
+    const ratioText = aspectRatio === '9:16' ? 'Vertical 9:16 (Shorts/Reels)' : 'Horizontal 16:9 (YouTube Standard)';
+    const compositionHint = aspectRatio === '9:16' ? 'Centralized composition optimized for vertical scrolling UI' : 'Cinematic wide composition';
 
     if (hasRefImage) {
         prompt = `
-*** MISSION: HIGH-CTR YOUTUBE THUMBNAIL REMIX ***
+*** MISSION: HIGH-CTR YOUTUBE THUMBNAIL REMIX (${ratioText}) ***
 
 [PHASE 1: EXPERT ANALYSIS (DECONSTRUCTION)]
 You are a World-Class YouTube Art Director & Data Analyst.
@@ -66,27 +69,31 @@ Now, you must transplant this "Winning Formula" into a completely new context.
 - **Source Style**: The Reference Image provided.
 - **Target Topic**: "${topic}"
 - **Target Emotion**: "${emotion}"
+- **Target Aspect Ratio**: ${ratioText}
 
 **INSTRUCTION RULES:**
 - **KEEP (The Skeleton)**: You MUST preserve the exact Layout, Camera Angle, Lighting Style, and Font Design of the reference.
 - **CHANGE (The Skin)**: Replace the actual subject and objects to match the new topic: "${topic}".
 - **TEXT**: If the reference has text, replace it with English or Korean text relevant to "${topic}". Match the font style perfectly.
+- **FORMAT**: Ensure the final image composition fits ${ratioText}.
 `;
     } else {
         // Standard Mode (No Reference Image)
         prompt = `
-*** MISSION: BEST-IN-CLASS VIRAL THUMBNAIL ***
+*** MISSION: BEST-IN-CLASS VIRAL THUMBNAIL (${ratioText}) ***
 
 [PHASE 1: VISUAL PLANNING]
 You are designing a thumbnail for the topic: "${topic}".
 - **Core Emotion**: ${emotion || 'Excited and Shocked'}
 - **Composition**: ${composition || 'Rule of Thirds'}
-- **Negative Space**: ${textSpace ? 'Required on the side for text overlay' : 'Balanced'}
+- **Negative Space**: ${textSpace ? 'Required on the side (or top/bottom for vertical) for text overlay' : 'Balanced'}
+- **Aspect Ratio**: ${ratioText}
 
 [PHASE 2: SCENE DESCRIPTION]
 1. **Subject**: A high-quality, expressive subject appropriate for "${topic}".
 2. **Action**: Dynamic movement or strong facial expression conveying "${emotion}".
 3. **Lighting**: Professional Studio Lighting, Rim Lighting (Backlight) to separate subject from background.
+4. **Framing**: ${compositionHint}.
 `;
     }
 
@@ -106,6 +113,7 @@ Generate the final image with these specific directives:
 - **Main Subject**: A central figure or object representing "${topic}", posing with "${emotion}" emotion.
 - **Background**: Relevant to "${topic}" but maintaining high quality blur/focus ratio.
 - **Quality**: 8K Display, Hyper-realistic, Unreal Engine 5 Render, Ray Tracing, Vivid Colors.
+- **Aspect Ratio**: ${ratioText}.
 - **Negative Prompts**: Do not simply copy the pixels. Do not make the text messy. Do not deform hands/faces.
 
 [EXECUTE NOW]
