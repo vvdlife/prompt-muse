@@ -10,7 +10,12 @@ export const extractVideoId = (url: string): string | null => {
             const parts = urlObj.pathname.split('/');
             return parts[2] || null; // /shorts/vid -> parts[0]="", parts[1]="shorts", parts[2]="vid"
         }
-        // 3. Shortened: youtu.be/VID
+        // 3. Live: youtube.com/live/VID
+        if (urlObj.hostname.includes('youtube.com') && urlObj.pathname.startsWith('/live/')) {
+            const parts = urlObj.pathname.split('/');
+            return parts[2] || null;
+        }
+        // 4. Shortened: youtu.be/VID
         if (urlObj.hostname === 'youtu.be') {
             return urlObj.pathname.slice(1);
         }
